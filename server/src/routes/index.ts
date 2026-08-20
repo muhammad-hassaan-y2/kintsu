@@ -11,6 +11,7 @@ import analyticsRoutes from './analytics.routes.js';
 import aiRoutes from './ai.routes.js';
 import sessionBuilderRoutes from './sessionBuilder.routes.js';
 import roleplayRoutes from './roleplay.routes.js';
+import progressRoutes from './progress.routes.js';
 
 const apiRouter = Router();
 
@@ -26,5 +27,6 @@ apiRouter.use('/analytics', analyticsRoutes);
 apiRouter.use('/ai', aiRoutes);
 apiRouter.use('/session-builder', sessionBuilderRoutes);
 apiRouter.use('/roleplay', roleplayRoutes);
+apiRouter.use('/progress', progressRoutes);
 
 export default apiRouter;

@@ -19,6 +19,10 @@ This backend powers group-based rehabilitation classroom sessions inside correct
 | `POST /api/session-builder/generate-ai` | Session Builder | Auto-generate structured steps using Gemini AI |
 | `POST /api/session-builder/validate` | Session Builder | Validate step continuity & time limits |
 | `POST /api/session-builder/publish` | Session Builder | Finalize & publish session to active classroom schedule |
+| `GET /api/progress/summary` | Progress Tracking | Global facility progress summary & stage distribution |
+| `GET /api/progress/participants/:id` | Progress Tracking | Full participant report, timeline, & certificates |
+| `POST /api/progress/participants/:id/log` | Progress Tracking | Log milestone entry for session, book, or benchmark |
+| `PATCH /api/progress/participants/:id/stage` | Progress Tracking | Advance inmate rehabilitation stage |
 | `GET /api/stories` | Story Library | Motivational & transformation story database |
 | `GET /api/books` | Reading Initiative | Approved books, summaries, & reading incentives |
 | `GET /api/videos` | Video Library | Curated documentaries & de-escalation guides |
