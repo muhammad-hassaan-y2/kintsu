@@ -13,7 +13,12 @@ This backend powers group-based rehabilitation classroom sessions inside correct
 | `POST /api/auth/login` | Authentication | Instructor & Case worker JWT login |
 | `GET /api/sessions` | Session Management | List all rehabilitation sessions |
 | `GET /api/sessions/today` | Today's Sessions | Classroom dashboard for today's active sessions |
-| `POST /api/sessions` | Session Builder | Construct custom structured classroom sessions |
+| `GET /api/session-builder/templates` | Session Builder | Pre-made rehabilitation templates (De-escalation, Re-entry, Family) |
+| `POST /api/session-builder/draft` | Session Builder | Save draft sessions in progress |
+| `GET /api/session-builder/drafts` | Session Builder | List all active session drafts |
+| `POST /api/session-builder/generate-ai` | Session Builder | Auto-generate structured steps using Gemini AI |
+| `POST /api/session-builder/validate` | Session Builder | Validate step continuity & time limits |
+| `POST /api/session-builder/publish` | Session Builder | Finalize & publish session to active classroom schedule |
 | `GET /api/stories` | Story Library | Motivational & transformation story database |
 | `GET /api/books` | Reading Initiative | Approved books, summaries, & reading incentives |
 | `GET /api/videos` | Video Library | Curated documentaries & de-escalation guides |

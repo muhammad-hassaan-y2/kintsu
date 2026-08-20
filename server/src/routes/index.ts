@@ -9,6 +9,7 @@ import discussionsRoutes from './discussions.routes.js';
 import resourcesRoutes from './resources.routes.js';
 import analyticsRoutes from './analytics.routes.js';
 import aiRoutes from './ai.routes.js';
+import sessionBuilderRoutes from './sessionBuilder.routes.js';
 
 const apiRouter = Router();
 
@@ -22,5 +23,6 @@ apiRouter.use('/discussions', discussionsRoutes);
 apiRouter.use('/resources', resourcesRoutes);
 apiRouter.use('/analytics', analyticsRoutes);
 apiRouter.use('/ai', aiRoutes);
+apiRouter.use('/session-builder', sessionBuilderRoutes);
 
 export default apiRouter;
