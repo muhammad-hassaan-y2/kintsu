@@ -1,3 +1,5 @@
+"use client";
+
 import * as React from "react";
 import {
   ChevronLeftIcon,
@@ -125,3 +127,4 @@ export {
   PaginationNext,
   PaginationEllipsis,
 };
+

@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import {
   CalendarDays, Users, BarChart2, BookOpen, Theater, Settings, HelpCircle,
@@ -10,7 +12,8 @@ import {
   GripVertical, Video, Mic, Smile, ThumbsUp
 } from "lucide-react";
 import { ImageWithFallback } from "@/app/components/figma/ImageWithFallback";
-import kintsuLogo from "@/imports/kintsu-logo.png";
+const kintsuLogo = "/kintsu-logo.png";
+
 
 const T = {
   navy:      "#0A1628",
