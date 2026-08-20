@@ -10,6 +10,7 @@ import resourcesRoutes from './resources.routes.js';
 import analyticsRoutes from './analytics.routes.js';
 import aiRoutes from './ai.routes.js';
 import sessionBuilderRoutes from './sessionBuilder.routes.js';
+import roleplayRoutes from './roleplay.routes.js';
 
 const apiRouter = Router();
 
@@ -24,5 +25,6 @@ apiRouter.use('/resources', resourcesRoutes);
 apiRouter.use('/analytics', analyticsRoutes);
 apiRouter.use('/ai', aiRoutes);
 apiRouter.use('/session-builder', sessionBuilderRoutes);
+apiRouter.use('/roleplay', roleplayRoutes);
 
 export default apiRouter;
