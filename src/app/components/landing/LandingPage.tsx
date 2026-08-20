@@ -6,21 +6,21 @@ import {
   Sparkles, Layers, ShieldCheck, ArrowRight, Play, BookOpen, 
   Theater, Users, BarChart3, CheckCircle2, ChevronRight, Award, 
   Presentation, Clock, FileText, Heart, Video, MessageCircle, Star, HelpCircle,
-  Zap, Radio
+  Zap, Radio, Activity, Lock, Check
 } from "lucide-react";
 import { AuthModal } from "@/app/components/auth/AuthModal";
 
 const T = {
-  navy:      "#0A1628",
-  midnight:  "#1E3A5F",
-  midnightL: "#243F6A",
-  gold:      "#C9A227",
-  goldDim:   "rgba(201,162,39,0.18)",
-  burgundy:  "#722F37",
-  cream:     "#F5F0E8",
-  creamDim:  "rgba(245,240,232,0.65)",
+  navy:      "#070F1E",
+  midnight:  "#122540",
+  midnightL: "#1B3459",
+  gold:      "#D4AF37",
+  goldLight: "#F3E5AB",
+  goldDim:   "rgba(212,175,55,0.22)",
+  cream:     "#FAF7F2",
+  creamDim:  "rgba(250,247,242,0.70)",
   slateL:    "#94A3B8",
-  border:    "rgba(201,162,39,0.15)",
+  border:    "rgba(212,175,55,0.20)",
   ease:      "cubic-bezier(0.4,0,0.2,1)",
 };
 
@@ -41,54 +41,61 @@ export function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen text-white font-sans selection:bg-gold/30 selection:text-gold relative overflow-x-hidden" style={{ backgroundColor: T.navy }}>
-      {/* Custom CSS Animation Keyframes */}
+    <div className="min-h-screen text-white font-sans selection:bg-amber-500/30 selection:text-amber-300 relative overflow-x-hidden" style={{ backgroundColor: T.navy }}>
+      {/* Custom Keyframe Animations */}
       <style jsx global>{`
-        @keyframes floatSlow {
-          0%, 100% { transform: translateY(0px) rotate(0deg); }
-          50% { transform: translateY(-10px) rotate(0.5deg); }
+        @keyframes heroGlow {
+          0%, 100% { opacity: 0.25; transform: scale(1) translate(-50%, -50%); }
+          50% { opacity: 0.40; transform: scale(1.12) translate(-48%, -52%); }
         }
-        @keyframes pulseGlow {
-          0%, 100% { opacity: 0.15; transform: scale(1); }
-          50% { opacity: 0.28; transform: scale(1.08); }
+        @keyframes floatCard {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-8px); }
         }
-        @keyframes shimmerGradient {
+        @keyframes goldPulseGlow {
+          0%, 100% { box-shadow: 0 0 15px rgba(212,175,55,0.3), inset 0 0 10px rgba(212,175,55,0.1); }
+          50% { box-shadow: 0 0 35px rgba(212,175,55,0.6), inset 0 0 20px rgba(212,175,55,0.25); }
+        }
+        @keyframes metallicShimmer {
           0% { background-position: -200% 0; }
           100% { background-position: 200% 0; }
         }
-        @keyframes badgePulse {
-          0%, 100% { box-shadow: 0 0 0 0 rgba(201,162,39,0.4); }
-          50% { box-shadow: 0 0 0 12px rgba(201,162,39,0); }
-        }
-        .animate-float { animation: floatSlow 4s ease-in-out infinite; }
-        .animate-glow { animation: pulseGlow 6s ease-in-out infinite; }
-        .animate-badge-pulse { animation: badgePulse 2.5s ease-in-out infinite; }
-        .shimmer-text {
-          background: linear-gradient(90deg, #F5F0E8 0%, #C9A227 50%, #F5F0E8 100%);
+        .hero-glow-1 { animation: heroGlow 8s ease-in-out infinite; }
+        .float-widget { animation: floatCard 4.5s ease-in-out infinite; }
+        .gold-border-glow { animation: goldPulseGlow 3s ease-in-out infinite; }
+        .text-metallic {
+          background: linear-gradient(135deg, #FFF 0%, #F3E5AB 30%, #D4AF37 70%, #FFF 100%);
           background-size: 200% auto;
           color: transparent;
           -webkit-background-clip: text;
-          animation: shimmerGradient 4s linear infinite;
+          animation: metallicShimmer 5s linear infinite;
+        }
+        .glass-card {
+          background: rgba(18, 37, 64, 0.75);
+          backdrop-filter: blur(16px);
+          -webkit-backdrop-filter: blur(16px);
         }
       `}</style>
 
       {/* Navigation Header */}
-      <header className="sticky top-0 z-40 border-b backdrop-blur-xl transition-all duration-300" style={{ backgroundColor: `${T.navy}DD`, borderColor: T.border }}>
+      <header className="sticky top-0 z-40 border-b backdrop-blur-2xl transition-all duration-300" style={{ backgroundColor: `${T.navy}EE`, borderColor: T.border }}>
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           {/* Logo */}
-          <div className="flex items-center gap-3 cursor-pointer group" onClick={() => router.push("/")}>
-            <img src="/kintsu-logo.png" alt="Kintsu Logo" className="h-9 w-auto transition-transform group-hover:scale-105" />
+          <div className="flex items-center gap-3.5 cursor-pointer group" onClick={() => router.push("/")}>
+            <div className="p-1.5 rounded-xl border border-amber-500/30 bg-amber-500/10 transition-transform group-hover:scale-105">
+              <img src="/kintsu-logo.png" alt="Kintsu Logo" className="h-8 w-auto" />
+            </div>
             <div className="flex flex-col">
-              <span className="font-bold text-lg tracking-wide text-white leading-none">KINTSU</span>
-              <span className="text-[10px] tracking-widest uppercase font-semibold" style={{ color: T.gold }}>Rehabilitation Suite</span>
+              <span className="font-extrabold text-xl tracking-wider text-white leading-none">KINTSU</span>
+              <span className="text-[10px] tracking-[0.2em] uppercase font-bold text-amber-400 mt-0.5">Rehabilitation Platform</span>
             </div>
           </div>
 
           {/* Nav Items */}
-          <nav className="hidden md:flex items-center gap-8 text-sm font-medium" style={{ color: T.creamDim }}>
+          <nav className="hidden md:flex items-center gap-9 text-sm font-semibold tracking-wide" style={{ color: T.creamDim }}>
             <a href="#overview" className="hover:text-amber-400 transition-colors">Classroom Model</a>
             <a href="#showcase" className="hover:text-amber-400 transition-colors">Instructor Tools</a>
-            <a href="#impact" className="hover:text-amber-400 transition-colors">Facility Impact</a>
+            <a href="#impact" className="hover:text-amber-400 transition-colors">Impact & Security</a>
           </nav>
 
           {/* Action CTAs */}
@@ -102,11 +109,11 @@ export function LandingPage() {
             </button>
             <button
               onClick={() => router.push("/dashboard")}
-              className="px-5 py-2.5 text-sm font-bold rounded-xl transition-all shadow-lg hover:shadow-amber-500/20 active:scale-95 flex items-center gap-2 group"
+              className="px-6 py-2.5 text-sm font-extrabold rounded-xl transition-all shadow-xl hover:scale-105 active:scale-95 flex items-center gap-2.5 group"
               style={{
                 backgroundColor: T.gold,
                 color: T.navy,
-                boxShadow: "0 4px 18px rgba(201,162,39,0.35)",
+                boxShadow: "0 6px 25px rgba(212,175,55,0.4)",
               }}
             >
               <span>Launch Classroom Session</span>
@@ -116,124 +123,139 @@ export function LandingPage() {
         </div>
       </header>
 
-      {/* Hero Section with Animated Glows */}
-      <section id="overview" className="relative overflow-hidden pt-16 pb-16 border-b" style={{ borderColor: T.border }}>
-        {/* Animated Background Radial Glows */}
+      {/* Hero Section */}
+      <section id="overview" className="relative overflow-hidden pt-20 pb-20 border-b" style={{ borderColor: T.border }}>
+        {/* Ambient Radial Background Glows */}
         <div 
-          className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[750px] h-[500px] rounded-full blur-[140px] pointer-events-none animate-glow"
-          style={{ backgroundColor: "rgba(201,162,39,0.12)" }}
-        />
-        <div 
-          className="absolute top-2/3 left-1/4 w-[400px] h-[400px] rounded-full blur-[120px] pointer-events-none animate-glow"
-          style={{ backgroundColor: "rgba(30,58,95,0.4)" }}
+          className="absolute top-1/3 left-1/2 w-[850px] h-[550px] rounded-full blur-[150px] pointer-events-none hero-glow-1"
+          style={{ backgroundColor: "rgba(212,175,55,0.14)" }}
         />
 
         <div className="max-w-7xl mx-auto px-6 relative z-10">
           <div className="text-center max-w-4xl mx-auto">
-            {/* Animated Badge */}
+            {/* Bold Badge */}
             <div 
-              className="inline-flex items-center gap-2 px-4.5 py-1.5 rounded-full text-xs font-semibold mb-6 border animate-badge-pulse transition-transform hover:scale-105 cursor-pointer"
+              className="inline-flex items-center gap-2.5 px-5 py-2 rounded-full text-xs font-extrabold mb-8 border gold-border-glow transition-transform hover:scale-105 cursor-pointer"
               style={{
-                backgroundColor: "rgba(201,162,39,0.12)",
+                backgroundColor: "rgba(212,175,55,0.12)",
                 borderColor: T.gold,
-                color: T.gold,
+                color: T.goldLight,
               }}
             >
-              <Presentation className="w-3.5 h-3.5 text-amber-400" />
-              <span>Instructor-Led Presentation System for Correctional Facilities</span>
+              <Presentation className="w-4 h-4 text-amber-400 animate-bounce" />
+              <span className="tracking-wide">INSTRUCTOR-LED PRESENTATION SYSTEM FOR PRISONS & NGOs</span>
             </div>
 
-            {/* Shimmering Animated Headline */}
-            <h1 className="text-3xl sm:text-5xl md:text-6xl font-extrabold tracking-tight leading-tight">
-              Empower Counselors & Officers to Lead <span className="shimmer-text">Impactful Rehabilitation Sessions</span>
+            {/* Bold Hero Headline */}
+            <h1 className="text-4xl sm:text-6xl md:text-7xl font-black tracking-tight leading-[1.15]">
+              Empower Counselors & Officers to Lead <span className="text-metallic">Impactful Rehabilitation</span>
             </h1>
 
             {/* Subtitle */}
-            <p className="mt-6 text-base sm:text-lg max-w-3xl mx-auto font-normal leading-relaxed" style={{ color: T.creamDim }}>
-              Designed for group classrooms inside prisons—eliminating the need for individual prisoner devices. A single instructor guides the session with structured modules, real stories, roleplay scenarios, and case analytics.
+            <p className="mt-7 text-base sm:text-xl max-w-3xl mx-auto font-normal leading-relaxed text-slate-300">
+              Built for group rehabilitation inside correctional facilities—eliminating the need for individual prisoner devices. A single instructor guides the entire classroom with structured modules, real stories, roleplays, and progress tracking.
             </p>
 
             {/* Action Buttons */}
-            <div className="mt-9 flex flex-col sm:flex-row items-center justify-center gap-4">
+            <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-5">
               <button
                 onClick={() => router.push("/dashboard")}
-                className="w-full sm:w-auto px-8 py-4 text-base font-bold rounded-2xl flex items-center justify-center gap-3 shadow-xl transition-all hover:scale-105 active:scale-95 group"
+                className="w-full sm:w-auto px-9 py-4.5 text-base font-black rounded-2xl flex items-center justify-center gap-3 shadow-2xl transition-all hover:scale-105 active:scale-95 group"
                 style={{
                   backgroundColor: T.gold,
                   color: T.navy,
-                  boxShadow: "0 8px 30px rgba(201,162,39,0.4)",
+                  boxShadow: "0 10px 35px rgba(212,175,55,0.45)",
                 }}
               >
-                <span>Enter Session Suite</span>
-                <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
+                <span>ENTER SESSION SUITE</span>
+                <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1.5" />
               </button>
               <button
                 onClick={() => openAuth("login")}
-                className="w-full sm:w-auto px-7 py-4 text-base font-semibold rounded-2xl border flex items-center justify-center gap-2 transition-all hover:bg-white/10 hover:border-amber-400/50"
+                className="w-full sm:w-auto px-8 py-4.5 text-base font-bold rounded-2xl border flex items-center justify-center gap-2.5 transition-all hover:bg-white/10 hover:border-amber-400/60"
                 style={{
                   borderColor: T.border,
                   color: T.cream,
-                  backgroundColor: `${T.midnight}80`,
+                  backgroundColor: `${T.midnight}90`,
                 }}
               >
-                <ShieldCheck className="w-4 h-4 text-amber-400" />
-                <span>Officer & NGO Portal</span>
+                <ShieldCheck className="w-5 h-5 text-amber-400" />
+                <span>OFFICER & NGO PORTAL</span>
               </button>
+            </div>
+
+            {/* Metric Highlights Pill Bar */}
+            <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
+              <div className="p-4 rounded-2xl border glass-card text-center" style={{ borderColor: T.border }}>
+                <div className="text-2xl font-black text-amber-400">100%</div>
+                <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mt-1">Instructor-Led Classroom</div>
+              </div>
+              <div className="p-4 rounded-2xl border glass-card text-center" style={{ borderColor: T.border }}>
+                <div className="text-2xl font-black text-emerald-400">0 Devices</div>
+                <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mt-1">Required for Inmates</div>
+              </div>
+              <div className="p-4 rounded-2xl border glass-card text-center" style={{ borderColor: T.border }}>
+                <div className="text-2xl font-black text-amber-400">48+ Modules</div>
+                <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mt-1">Roleplay & Stories</div>
+              </div>
+              <div className="p-4 rounded-2xl border glass-card text-center" style={{ borderColor: T.border }}>
+                <div className="text-2xl font-black text-sky-400">24/7 Security</div>
+                <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mt-1">Offline-Ready Logging</div>
+              </div>
             </div>
           </div>
 
-          {/* Floating Interactive Preview Widget */}
-          <div className="mt-14 max-w-5xl mx-auto animate-float">
+          {/* Floating Live Classroom Preview Widget */}
+          <div className="mt-14 max-w-5xl mx-auto float-widget">
             <div 
-              className="rounded-2xl border p-6 shadow-2xl relative overflow-hidden backdrop-blur-md"
+              className="rounded-3xl border p-7 shadow-2xl glass-card relative overflow-hidden"
               style={{
-                backgroundColor: `${T.midnight}EE`,
-                borderColor: T.goldDim,
-                boxShadow: "0 20px 50px rgba(0,0,0,0.6)",
+                borderColor: T.gold,
+                boxShadow: "0 25px 60px rgba(0,0,0,0.7), 0 0 25px rgba(212,175,55,0.2)",
               }}
             >
               {/* Header Bar */}
-              <div className="flex items-center justify-between pb-4 border-b mb-6" style={{ borderColor: T.border }}>
+              <div className="flex flex-wrap items-center justify-between pb-5 border-b mb-6 gap-3" style={{ borderColor: T.border }}>
                 <div className="flex items-center gap-3">
-                  <div className="relative flex h-3 w-3">
+                  <div className="relative flex h-3.5 w-3.5">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-3 w-3 bg-amber-500"></span>
+                    <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-amber-500"></span>
                   </div>
-                  <span className="text-xs font-bold uppercase tracking-wider text-amber-300">Live Classroom Presentation Mode</span>
+                  <span className="text-xs font-black uppercase tracking-widest text-amber-300">Live Session Display Mode</span>
                 </div>
-                <div className="flex items-center gap-2 text-xs font-medium" style={{ color: T.slateL }}>
-                  <Users className="w-4 h-4 text-amber-400" />
-                  <span>14 Participants · Session Active</span>
+                <div className="flex items-center gap-3 text-xs font-bold text-slate-300">
+                  <span className="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Facility Block 4B</span>
+                  <span>14 Participants Active</span>
                 </div>
               </div>
 
               {/* Grid Content Preview */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="p-4 rounded-xl border transition-all hover:border-amber-400/50" style={{ backgroundColor: T.navy, borderColor: T.border }}>
-                  <div className="flex items-center justify-between text-xs mb-2">
-                    <span className="font-semibold text-amber-400">Current Module</span>
-                    <span className="text-gray-400">12:30 MIN</span>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                <div className="p-5 rounded-2xl border transition-all hover:scale-[1.02]" style={{ backgroundColor: T.navy, borderColor: T.border }}>
+                  <div className="flex items-center justify-between text-xs mb-3">
+                    <span className="font-bold text-amber-400">ACTIVE MODULE</span>
+                    <span className="text-slate-400 font-mono">12:30 MIN</span>
                   </div>
-                  <h4 className="text-sm font-bold text-white mb-1">Emotional Regulation & Growth</h4>
-                  <p className="text-xs text-gray-400">Instructor prompt: "Identify non-violent conflict triggers."</p>
+                  <h4 className="text-base font-bold text-white mb-1.5">Emotional Regulation & Growth</h4>
+                  <p className="text-xs text-slate-300 leading-relaxed">Instructor prompt: "Identify non-violent conflict triggers."</p>
                 </div>
 
-                <div className="p-4 rounded-xl border transition-all hover:border-amber-400/50" style={{ backgroundColor: T.navy, borderColor: T.border }}>
-                  <div className="flex items-center justify-between text-xs mb-2">
-                    <span className="font-semibold text-emerald-400">Active Exercise</span>
-                    <span className="text-gray-400">Roleplay #3</span>
+                <div className="p-5 rounded-2xl border transition-all hover:scale-[1.02]" style={{ backgroundColor: T.navy, borderColor: T.border }}>
+                  <div className="flex items-center justify-between text-xs mb-3">
+                    <span className="font-bold text-emerald-400">SIMULATION MODE</span>
+                    <span className="text-slate-400 font-mono">Roleplay #3</span>
                   </div>
-                  <h4 className="text-sm font-bold text-white mb-1">De-escalation Simulation</h4>
-                  <p className="text-xs text-gray-400">2 participants practicing non-defensive listening posture.</p>
+                  <h4 className="text-base font-bold text-white mb-1.5">De-escalation Exercise</h4>
+                  <p className="text-xs text-slate-300 leading-relaxed">2 participants practicing non-defensive listening posture.</p>
                 </div>
 
-                <div className="p-4 rounded-xl border transition-all hover:border-amber-400/50" style={{ backgroundColor: T.navy, borderColor: T.border }}>
-                  <div className="flex items-center justify-between text-xs mb-2">
-                    <span className="font-semibold text-amber-400">Officer Note</span>
-                    <span className="text-gray-400">Logged</span>
+                <div className="p-5 rounded-2xl border transition-all hover:scale-[1.02]" style={{ backgroundColor: T.navy, borderColor: T.border }}>
+                  <div className="flex items-center justify-between text-xs mb-3">
+                    <span className="font-bold text-amber-400">OFFICER LOG</span>
+                    <span className="text-slate-400 font-mono">Saved</span>
                   </div>
-                  <h4 className="text-sm font-bold text-white mb-1">Group Progress Tracker</h4>
-                  <p className="text-xs text-gray-400">Attendance: 100% · Active participation: High</p>
+                  <h4 className="text-base font-bold text-white mb-1.5">Group Progress Tracker</h4>
+                  <p className="text-xs text-slate-300 leading-relaxed">Attendance: 100% · Active participation: High</p>
                 </div>
               </div>
             </div>
@@ -242,16 +264,16 @@ export function LandingPage() {
       </section>
 
       {/* Compact Interactive Feature Showcase */}
-      <section id="showcase" className="py-16 max-w-7xl mx-auto px-6">
-        <div className="text-center max-w-2xl mx-auto mb-10">
-          <h2 className="text-xs uppercase tracking-widest font-bold mb-2 text-amber-400">Classroom Control Center</h2>
-          <p className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
+      <section id="showcase" className="py-20 max-w-7xl mx-auto px-6">
+        <div className="text-center max-w-2xl mx-auto mb-12">
+          <h2 className="text-xs uppercase tracking-widest font-black text-amber-400 mb-2">Classroom Control Center</h2>
+          <p className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
             Everything your instructors need on one display
           </p>
         </div>
 
-        {/* Feature Tab Buttons with Micro-interactions */}
-        <div className="flex flex-wrap items-center justify-center gap-3 mb-8">
+        {/* Feature Tab Buttons */}
+        <div className="flex flex-wrap items-center justify-center gap-3.5 mb-10">
           {[
             { id: "classroom", label: "Classroom Presentation", icon: <Presentation className="w-4 h-4" /> },
             { id: "roleplay", label: "Roleplay & Exercises", icon: <Theater className="w-4 h-4" /> },
@@ -261,13 +283,13 @@ export function LandingPage() {
             <button
               key={tab.id}
               onClick={() => setActiveFeatureTab(tab.id as any)}
-              className="flex items-center gap-2.5 px-5 py-3 rounded-xl text-sm font-semibold transition-all duration-300 border active:scale-95"
+              className="flex items-center gap-2.5 px-6 py-3.5 rounded-2xl text-sm font-bold transition-all duration-300 border active:scale-95 cursor-pointer"
               style={{
                 backgroundColor: activeFeatureTab === tab.id ? T.gold : `${T.midnight}C0`,
                 color: activeFeatureTab === tab.id ? T.navy : T.creamDim,
                 borderColor: activeFeatureTab === tab.id ? T.gold : T.border,
-                boxShadow: activeFeatureTab === tab.id ? "0 6px 24px rgba(201,162,39,0.3)" : "none",
-                transform: activeFeatureTab === tab.id ? "translateY(-2px)" : "none",
+                boxShadow: activeFeatureTab === tab.id ? "0 8px 25px rgba(212,175,55,0.4)" : "none",
+                transform: activeFeatureTab === tab.id ? "translateY(-3px)" : "none",
               }}
             >
               {tab.icon}
@@ -276,56 +298,56 @@ export function LandingPage() {
           ))}
         </div>
 
-        {/* Dynamic Display Card */}
+        {/* Dynamic Showcase Card */}
         <div 
-          className="rounded-2xl border p-8 shadow-2xl relative overflow-hidden transition-all duration-500"
+          className="rounded-3xl border p-9 shadow-2xl glass-card transition-all duration-500"
           style={{
-            backgroundColor: T.midnight,
             borderColor: T.border,
-            boxShadow: "0 16px 40px rgba(0,0,0,0.5)",
+            boxShadow: "0 20px 50px rgba(0,0,0,0.6)",
           }}
         >
           {activeFeatureTab === "classroom" && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center animate-fade-in">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
               <div>
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-4" style={{ backgroundColor: `${T.gold}20`, color: T.gold }}>
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold mb-4 bg-amber-500/15 text-amber-300 border border-amber-500/30">
                   <Clock className="w-3.5 h-3.5" />
                   <span>Module 1 · Emotional Regulation & Growth</span>
                 </div>
-                <h3 className="text-2xl font-bold text-white mb-3">Structured Group Session Presentation</h3>
-                <p className="text-sm leading-relaxed mb-6" style={{ color: T.slateL }}>
+                <h3 className="text-3xl font-extrabold text-white mb-4">Structured Group Session Presentation</h3>
+                <p className="text-base leading-relaxed text-slate-300 mb-6">
                   Instructors project lesson slides, guided discussion prompts, and video vignettes onto the classroom wall. Participants engage in structured group dialogue without needing personal hardware.
                 </p>
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3 text-sm text-white">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                <div className="space-y-3.5">
+                  <div className="flex items-center gap-3 text-sm text-white font-medium">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
                     <span>Step-by-step facilitation prompts for counselors</span>
                   </div>
-                  <div className="flex items-center gap-3 text-sm text-white">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <div className="flex items-center gap-3 text-sm text-white font-medium">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
                     <span>Built-in group timer and discussion queues</span>
                   </div>
                 </div>
               </div>
-              <div className="rounded-xl border p-6 transition-all hover:scale-[1.01]" style={{ backgroundColor: T.navy, borderColor: T.goldDim }}>
-                <div className="flex items-center justify-between pb-4 border-b mb-4" style={{ borderColor: T.border }}>
+
+              <div className="rounded-2xl border p-7 bg-slate-950/80 border-amber-500/30">
+                <div className="flex items-center justify-between pb-4 border-b border-amber-500/20 mb-5">
                   <div className="flex items-center gap-2">
                     <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse" />
-                    <span className="text-xs font-bold uppercase tracking-wider text-amber-400">Live Session Display</span>
+                    <span className="text-xs font-black uppercase tracking-wider text-amber-400">Live Session Display</span>
                   </div>
-                  <span className="text-xs text-gray-400">Classroom 4B</span>
+                  <span className="text-xs font-medium text-slate-400">Classroom 4B</span>
                 </div>
-                <div className="space-y-3">
-                  <div className="p-3.5 rounded-lg border text-xs" style={{ backgroundColor: T.midnight, borderColor: T.border }}>
-                    <p className="font-semibold text-amber-300 mb-1">Discussion Prompt #2:</p>
-                    <p className="text-white">"How do we pause and reframe emotional triggers when faced with conflict?"</p>
+                <div className="space-y-4">
+                  <div className="p-4 rounded-xl border border-amber-500/20 bg-slate-900/90">
+                    <p className="font-bold text-amber-300 text-xs mb-1.5">Discussion Prompt #2:</p>
+                    <p className="text-sm text-white font-medium">"How do we pause and reframe emotional triggers when faced with conflict?"</p>
                   </div>
-                  <div className="p-3.5 rounded-lg border text-xs flex items-center justify-between" style={{ backgroundColor: T.midnight, borderColor: T.border }}>
-                    <div className="flex items-center gap-2 text-white">
-                      <Video className="w-4 h-4 text-amber-400" />
-                      <span>Video Guide: Breaking the Cycle of Anger</span>
+                  <div className="p-4 rounded-xl border border-amber-500/20 bg-slate-900/90 flex items-center justify-between">
+                    <div className="flex items-center gap-3 text-sm text-white">
+                      <Video className="w-5 h-5 text-amber-400" />
+                      <span className="font-semibold">Video Guide: Breaking the Cycle of Anger</span>
                     </div>
-                    <span className="text-[10px] px-2 py-0.5 rounded bg-amber-400/20 text-amber-300 font-bold">4:30 MIN</span>
+                    <span className="text-xs px-2.5 py-1 rounded-md bg-amber-400/20 text-amber-300 font-bold">4:30 MIN</span>
                   </div>
                 </div>
               </div>
@@ -333,32 +355,33 @@ export function LandingPage() {
           )}
 
           {activeFeatureTab === "roleplay" && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center animate-fade-in">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
               <div>
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-4" style={{ backgroundColor: `${T.gold}20`, color: T.gold }}>
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold mb-4 bg-amber-500/15 text-amber-300 border border-amber-500/30">
                   <Theater className="w-3.5 h-3.5" />
                   <span>Behavioral Simulation</span>
                 </div>
-                <h3 className="text-2xl font-bold text-white mb-3">Interactive Roleplay Scenarios</h3>
-                <p className="text-sm leading-relaxed mb-6" style={{ color: T.slateL }}>
+                <h3 className="text-3xl font-extrabold text-white mb-4">Interactive Roleplay Scenarios</h3>
+                <p className="text-base leading-relaxed text-slate-300 mb-6">
                   Counselors select conflict resolution and communication scenarios. Two or three participants act out the scenario while the class observes and reflects using guided rubrics.
                 </p>
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3 text-sm text-white">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                <div className="space-y-3.5">
+                  <div className="flex items-center gap-3 text-sm text-white font-medium">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
                     <span>Real-world reintegration and workplace scenarios</span>
                   </div>
-                  <div className="flex items-center gap-3 text-sm text-white">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <div className="flex items-center gap-3 text-sm text-white font-medium">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
                     <span>Constructive peer feedback templates</span>
                   </div>
                 </div>
               </div>
-              <div className="rounded-xl border p-6 transition-all hover:scale-[1.01]" style={{ backgroundColor: T.navy, borderColor: T.goldDim }}>
-                <div className="text-xs font-bold text-amber-400 uppercase tracking-wider mb-2">Current Roleplay Exercise</div>
-                <h4 className="text-base font-bold text-white mb-2">Scenario: De-escalating Workplace Misunderstandings</h4>
-                <p className="text-xs text-gray-300 mb-4">Roles: Employee A (Misunderstood task), Supervisor B (Demanding update)</p>
-                <div className="p-3 rounded-lg border text-xs text-amber-200" style={{ backgroundColor: T.midnight, borderColor: T.border }}>
+
+              <div className="rounded-2xl border p-7 bg-slate-950/80 border-amber-500/30">
+                <div className="text-xs font-black text-amber-400 uppercase tracking-wider mb-2">Current Roleplay Exercise</div>
+                <h4 className="text-lg font-extrabold text-white mb-2">Scenario: De-escalating Workplace Misunderstandings</h4>
+                <p className="text-xs text-slate-300 mb-5">Roles: Employee A (Misunderstood task), Supervisor B (Demanding update)</p>
+                <div className="p-4 rounded-xl border border-amber-500/20 bg-slate-900/90 text-xs text-amber-200 leading-relaxed font-medium">
                   Focus Area: Active listening, non-defensive posture, and clear clarification questions.
                 </div>
               </div>
@@ -366,79 +389,81 @@ export function LandingPage() {
           )}
 
           {activeFeatureTab === "stories" && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center animate-fade-in">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
               <div>
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-4" style={{ backgroundColor: `${T.gold}20`, color: T.gold }}>
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold mb-4 bg-amber-500/15 text-amber-300 border border-amber-500/30">
                   <BookOpen className="w-3.5 h-3.5" />
                   <span>Inspirational Narratives</span>
                 </div>
-                <h3 className="text-2xl font-bold text-white mb-3">Rehabilitation Story Library</h3>
-                <p className="text-sm leading-relaxed mb-6" style={{ color: T.slateL }}>
+                <h3 className="text-3xl font-extrabold text-white mb-4">Rehabilitation Story Library</h3>
+                <p className="text-base leading-relaxed text-slate-300 mb-6">
                   Access curated audio and video stories of successful reintegration, community rebuilding, and personal transformation to inspire hope and accountability during sessions.
                 </p>
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3 text-sm text-white">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                <div className="space-y-3.5">
+                  <div className="flex items-center gap-3 text-sm text-white font-medium">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
                     <span>First-person testimonies & expert commentary</span>
                   </div>
-                  <div className="flex items-center gap-3 text-sm text-white">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <div className="flex items-center gap-3 text-sm text-white font-medium">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
                     <span>Downloadable discussion guides for counselors</span>
                   </div>
                 </div>
               </div>
-              <div className="rounded-xl border p-6 space-y-3 transition-all hover:scale-[1.01]" style={{ backgroundColor: T.navy, borderColor: T.goldDim }}>
-                <div className="p-3 rounded-lg border flex items-center justify-between" style={{ backgroundColor: T.midnight, borderColor: T.border }}>
+
+              <div className="rounded-2xl border p-7 bg-slate-950/80 border-amber-500/30 space-y-4">
+                <div className="p-4 rounded-xl border border-amber-500/20 bg-slate-900/90 flex items-center justify-between hover:scale-[1.02] transition-transform">
                   <div>
-                    <p className="text-xs font-bold text-white">"From Cell to Community Leadership"</p>
-                    <p className="text-[10px] text-gray-400">Story of Marcus Vance · 12 Min Audio</p>
+                    <p className="text-sm font-bold text-white">"From Cell to Community Leadership"</p>
+                    <p className="text-xs text-slate-400 mt-0.5">Story of Marcus Vance · 12 Min Audio</p>
                   </div>
-                  <Play className="w-4 h-4 text-amber-400 fill-amber-400 cursor-pointer hover:scale-125 transition-transform" />
+                  <Play className="w-5 h-5 text-amber-400 fill-amber-400 cursor-pointer hover:scale-125 transition-transform" />
                 </div>
-                <div className="p-3 rounded-lg border flex items-center justify-between" style={{ backgroundColor: T.midnight, borderColor: T.border }}>
+                <div className="p-4 rounded-xl border border-amber-500/20 bg-slate-900/90 flex items-center justify-between hover:scale-[1.02] transition-transform">
                   <div>
-                    <p className="text-xs font-bold text-white">"Mastering Emotional Discipline"</p>
-                    <p className="text-[10px] text-gray-400">Psychology Panel · 8 Min Video</p>
+                    <p className="text-sm font-bold text-white">"Mastering Emotional Discipline"</p>
+                    <p className="text-xs text-slate-400 mt-0.5">Psychology Panel · 8 Min Video</p>
                   </div>
-                  <Play className="w-4 h-4 text-amber-400 fill-amber-400 cursor-pointer hover:scale-125 transition-transform" />
+                  <Play className="w-5 h-5 text-amber-400 fill-amber-400 cursor-pointer hover:scale-125 transition-transform" />
                 </div>
               </div>
             </div>
           )}
 
           {activeFeatureTab === "analytics" && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center animate-fade-in">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
               <div>
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-4" style={{ backgroundColor: `${T.gold}20`, color: T.gold }}>
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold mb-4 bg-amber-500/15 text-amber-300 border border-amber-500/30">
                   <BarChart3 className="w-3.5 h-3.5" />
                   <span>Confidential Tracking</span>
                 </div>
-                <h3 className="text-2xl font-bold text-white mb-3">Counselor Case Notes & Progress</h3>
-                <p className="text-sm leading-relaxed mb-6" style={{ color: T.slateL }}>
+                <h3 className="text-3xl font-extrabold text-white mb-4">Counselor Case Notes & Progress</h3>
+                <p className="text-base leading-relaxed text-slate-300 mb-6">
                   Counselors record attendance, active participation metrics, and qualitative progress notes confidentially. Generate institutional reports for prison administration and NGOs.
                 </p>
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3 text-sm text-white">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                <div className="space-y-3.5">
+                  <div className="flex items-center gap-3 text-sm text-white font-medium">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
                     <span>Secure offline-first data logging</span>
                   </div>
-                  <div className="flex items-center gap-3 text-sm text-white">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <div className="flex items-center gap-3 text-sm text-white font-medium">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
                     <span>Automated session summary reports for officers</span>
                   </div>
                 </div>
               </div>
-              <div className="rounded-xl border p-6 transition-all hover:scale-[1.01]" style={{ backgroundColor: T.navy, borderColor: T.goldDim }}>
+
+              <div className="rounded-2xl border p-7 bg-slate-950/80 border-amber-500/30">
                 <div className="flex items-center justify-between mb-3 text-xs">
                   <span className="font-bold text-white">Participant Attendance & Engagement</span>
-                  <span className="text-emerald-400 font-semibold">94% Active Completion</span>
+                  <span className="text-emerald-400 font-bold">94% Active Completion</span>
                 </div>
-                <div className="w-full h-2.5 bg-gray-800 rounded-full overflow-hidden mb-4">
-                  <div className="h-full bg-gradient-to-r from-amber-400 to-yellow-500 w-[94%]" />
+                <div className="w-full h-3 bg-slate-800 rounded-full overflow-hidden mb-5">
+                  <div className="h-full bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 w-[94%]" />
                 </div>
-                <div className="text-xs text-gray-300">
-                  <p className="font-semibold mb-1">Recent Case Note:</p>
-                  <p className="italic text-gray-400">"Strong participation in conflict resolution roleplay. Demonstrated key active listening steps."</p>
+                <div className="p-4 rounded-xl border border-amber-500/20 bg-slate-900/90 text-xs text-slate-300">
+                  <p className="font-bold text-white mb-1">Recent Case Note Logged:</p>
+                  <p className="italic text-slate-300 leading-relaxed">"Strong participation in conflict resolution roleplay. Demonstrated key active listening steps."</p>
                 </div>
               </div>
             </div>
@@ -447,16 +472,16 @@ export function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="py-8 border-t" style={{ borderColor: T.border, backgroundColor: T.navy }}>
-        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4 text-xs" style={{ color: T.slateL }}>
+      <footer className="py-10 border-t" style={{ borderColor: T.border, backgroundColor: T.navy }}>
+        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-5 text-xs font-medium" style={{ color: T.slateL }}>
           <div className="flex items-center gap-3">
             <img src="/kintsu-logo.png" alt="Kintsu Logo" className="h-6 w-auto" />
             <span>&copy; 2026 KINTSU Rehabilitation Platform. Built for Correctional Facilities & NGOs.</span>
           </div>
           <div className="flex items-center gap-6">
-            <a href="#" className="hover:underline">Counselor Manual</a>
-            <a href="#" className="hover:underline">Security Compliance</a>
-            <a href="#" className="hover:underline">Contact Support</a>
+            <a href="#" className="hover:text-amber-400 transition-colors">Counselor Manual</a>
+            <a href="#" className="hover:text-amber-400 transition-colors">Security Compliance</a>
+            <a href="#" className="hover:text-amber-400 transition-colors">Contact Support</a>
           </div>
         </div>
       </footer>
