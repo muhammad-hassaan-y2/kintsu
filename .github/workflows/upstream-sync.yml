@@ -1,0 +1,43 @@
+name: Upstream Sync & Auto Push
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # Runs daily at midnight UTC
+  workflow_dispatch: # Allows manual trigger from GitHub Actions tab
+
+permissions:
+  contents: write
+
+jobs:
+  sync-upstream:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Configure Git User
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Add Upstream Remote & Sync
+        run: |
+          git remote add upstream https://github.com/AsamaeS/kintsu.git || true
+          git fetch upstream main
+          
+          # Check if upstream has new commits
+          UPSTREAM_HASH=$(git rev-parse upstream/main)
+          LOCAL_HASH=$(git rev-parse HEAD)
+          
+          if [ "$UPSTREAM_HASH" != "$LOCAL_HASH" ]; then
+            echo "New upstream changes detected from original repository."
+            git merge upstream/main -m "Sync upstream updates from AsamaeS/kintsu"
+            git push origin main
+            echo "Successfully merged and pushed upstream updates to main."
+          else
+            echo "Repository is already up to date with upstream."
+          fi
