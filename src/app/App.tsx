@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   CalendarDays, Users, BarChart2, BookOpen, Theater, Settings, HelpCircle,
   MessageCircle, Clock, Cloud, Star, FileText, File, Presentation,
@@ -9,10 +10,11 @@ import {
   Heart, Brain, Handshake, Target, Layers, PieChart, Activity,
   FolderOpen, BookMarked, Clapperboard, X, UserPlus, Download,
   Edit, Trash2, Eye, RefreshCw, ArrowRight, CheckSquare, Square,
-  GripVertical, Video, Mic, Smile, ThumbsUp
+  GripVertical, Video, Mic, Smile, ThumbsUp, LogOut
 } from "lucide-react";
 import { ImageWithFallback } from "@/app/components/figma/ImageWithFallback";
 const kintsuLogo = "/kintsu-logo.png";
+
 
 
 const T = {
@@ -135,12 +137,13 @@ const NAV = [
 ];
 
 function Sidebar({ active, setActive }: { active: number; setActive: (n: number) => void }) {
+  const router = useRouter();
   return (
     <aside
       className="flex flex-col h-screen sticky top-0 shrink-0"
       style={{ width: 280, backgroundColor: T.navy, borderRight: `1px solid ${T.border}` }}
     >
-      <div className="flex flex-col items-center px-6 pt-6 pb-6">
+      <div className="flex flex-col items-center px-6 pt-6 pb-6 cursor-pointer" onClick={() => router.push("/")}>
         <ImageWithFallback
           src={kintsuLogo}
           alt="Kintsu — Rebuild · Restore · Reintegrate"
@@ -191,11 +194,18 @@ function Sidebar({ active, setActive }: { active: number; setActive: (n: number)
             <p className="text-[11px]" style={{ color: T.slate }}>Online · Case Worker</p>
           </div>
         </div>
-        <Bell size={15} style={{ color: T.slate }} />
+        <button 
+          onClick={() => router.push("/")}
+          title="Log Out & Return to Landing Page"
+          className="p-1.5 rounded-lg text-gray-400 hover:text-amber-400 hover:bg-white/10 transition-colors"
+        >
+          <LogOut size={16} />
+        </button>
       </div>
     </aside>
   );
 }
+
 
 function Footer() {
   return (
