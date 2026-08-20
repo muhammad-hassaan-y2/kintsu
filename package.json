@@ -7,9 +7,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "server:dev": "npm --prefix server run dev",
-    "server:build": "npm --prefix server run build",
-    "server:start": "npm --prefix server start"
+    "server:dev": "python -m uvicorn server.main:app --reload --port 8000",
+    "server:start": "python -m uvicorn server.main:app --port 8000"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",

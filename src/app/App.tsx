@@ -13,6 +13,20 @@ import {
   GripVertical, Video, Mic, Smile, ThumbsUp, LogOut
 } from "lucide-react";
 import { ImageWithFallback } from "@/app/components/figma/ImageWithFallback";
+import {
+  fetchTodaySessions,
+  fetchSessions,
+  generateAISession,
+  publishSession,
+  fetchParticipants,
+  fetchStories,
+  fetchBooks,
+  fetchAnalytics,
+  fetchRoleplayScenarios,
+  startRoleplay,
+  submitRoleplayTurn,
+  completeRoleplay
+} from "@/lib/api";
 const kintsuLogo = "/kintsu-logo.png";
 
 

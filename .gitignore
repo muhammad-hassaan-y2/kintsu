@@ -37,5 +37,8 @@ dist-ssr
 .cache
 .parcel-cache
 
-# OS files
+# OS & Python files
 Thumbs.db
+__pycache__/
+*.pyc
+venv/
