@@ -8,6 +8,7 @@ import participantsRoutes from './participants.routes.js';
 import discussionsRoutes from './discussions.routes.js';
 import resourcesRoutes from './resources.routes.js';
 import analyticsRoutes from './analytics.routes.js';
+import aiRoutes from './ai.routes.js';
 
 const apiRouter = Router();
 
@@ -20,5 +21,6 @@ apiRouter.use('/participants', participantsRoutes);
 apiRouter.use('/discussions', discussionsRoutes);
 apiRouter.use('/resources', resourcesRoutes);
 apiRouter.use('/analytics', analyticsRoutes);
+apiRouter.use('/ai', aiRoutes);
 
 export default apiRouter;
