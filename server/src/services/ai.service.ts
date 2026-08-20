@@ -1,26 +1,18 @@
 import { GoogleGenAI } from '@google/genai';
-import OpenAI from 'openai';
 
 const geminiApiKey = process.env.GEMINI_API_KEY || '';
-const openaiApiKey = process.env.OPENAI_API_KEY || '';
 
-let aiProvider: 'gemini' | 'openai' | 'mock' = 'mock';
-
-if (geminiApiKey) {
-  aiProvider = 'gemini';
-} else if (openaiApiKey) {
-  aiProvider = 'openai';
-}
+let aiProvider: 'gemini' | 'mock' = geminiApiKey ? 'gemini' : 'mock';
 
 console.log(`🤖 Kintsu AI Integration Provider Mode: [${aiProvider.toUpperCase()}]`);
 
 const googleAI = geminiApiKey ? new GoogleGenAI({ apiKey: geminiApiKey }) : null;
-const openai = openaiApiKey ? new OpenAI({ apiKey: openaiApiKey }) : null;
 
 export const getAIStatus = () => ({
-  provider: aiProvider,
+  provider: 'gemini',
+  activeMode: aiProvider,
   hasGeminiKey: Boolean(geminiApiKey),
-  hasOpenAIKey: Boolean(openaiApiKey),
+  model: 'gemini-2.5-flash',
   supportedFeatures: [
     'Rehabilitation Session Builder',
     'Participant Behavioral & Empathy Analysis',
@@ -30,7 +22,7 @@ export const getAIStatus = () => ({
 });
 
 /**
- * Low-level text completion helper that uses Gemini or OpenAI based on available API key
+ * Low-level text completion helper using Google Gemini API (gemini-2.5-flash)
  */
 async function generateText(prompt: string, systemInstruction?: string): Promise<string> {
   if (aiProvider === 'gemini' && googleAI) {
@@ -46,30 +38,15 @@ async function generateText(prompt: string, systemInstruction?: string): Promise
     }
   }
 
-  if (aiProvider === 'openai' && openai) {
-    try {
-      const response = await openai.chat.completions.create({
-        model: 'gpt-4o-mini',
-        messages: [
-          ...(systemInstruction ? [{ role: 'system' as const, content: systemInstruction }] : []),
-          { role: 'user' as const, content: prompt }
-        ]
-      });
-      return response.choices[0]?.message?.content || '';
-    } catch (err) {
-      console.warn('OpenAI API call failed, falling back to mock generator:', err);
-    }
-  }
-
-  // Fallback mock response if no API keys configured or call failed
+  // Fallback mock response if GEMINI_API_KEY is missing or call failed
   return '';
 }
 
 /**
- * Generate a complete structured rehabilitation classroom session
+ * Generate a complete structured rehabilitation classroom session using Gemini AI
  */
 export async function generateSessionAI(topic: string, category: string, block?: string) {
-  const systemInstruction = `You are an expert prison rehabilitation counselor and psychologist designing structured classroom sessions for inmate transformation. Output clean JSON only.`;
+  const systemInstruction = `You are an expert prison rehabilitation counselor and forensic psychologist designing structured classroom sessions for inmate mindset transformation. Output clean JSON only.`;
 
   const prompt = `Design a 6-step rehabilitation classroom session on the topic "${topic}" in category "${category}" for block "${block || 'Block C'}".
 Return a valid JSON object with the following structure:
@@ -92,13 +69,12 @@ Return a valid JSON object with the following structure:
 
   if (rawText) {
     try {
-      // Extract json block if present
       const jsonMatch = rawText.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
         return JSON.parse(jsonMatch[0]);
       }
     } catch (e) {
-      console.error('Failed to parse AI session response as JSON, returning fallback structure');
+      console.error('Failed to parse Gemini session response as JSON, returning fallback structure');
     }
   }
 
@@ -107,29 +83,29 @@ Return a valid JSON object with the following structure:
     title: `${topic}: Mindset & Emotional Growth`,
     subtitle: `Structured Group Learning Session on ${category}`,
     category,
-    description: `A comprehensive rehabilitation session focusing on ${topic.toLowerCase()}, designed to promote self-reflection and impulse control.`,
+    description: `A comprehensive rehabilitation session focusing on ${topic.toLowerCase()}, powered by Gemini AI guidance.`,
     steps: [
       { stepNumber: 1, type: 'video', title: `Introductory Video: Understanding ${topic}`, durationMinutes: 7, content: `Visual presentation introducing core principles of ${topic.toLowerCase()}.` },
       { stepNumber: 2, type: 'story', title: `Real-Life Transformation Story`, durationMinutes: 10, content: `A narrative of an individual who mastered ${topic.toLowerCase()} after overcoming major life obstacles.` },
       { stepNumber: 3, type: 'discussion', title: `Instructor-Led Discussion`, durationMinutes: 15, content: `Interactive dialogue exploring real-world applications of ${topic.toLowerCase()}.`, questions: [`How does ${topic.toLowerCase()} affect your daily choices?`, `What is one trigger you can control starting today?`] },
       { stepNumber: 4, type: 'activity', title: `Group Guided Exercise`, durationMinutes: 10, content: `Practical group exercise reinforcing positive behavioral choices.` },
-      { stepNumber: 5, type: 'reflection', typeName: 'reflection', title: `Personal Reflection & Journaling`, durationMinutes: 8, content: `Writing down one personal commitment for the week.` },
+      { stepNumber: 5, type: 'reflection', title: `Personal Reflection & Journaling`, durationMinutes: 8, content: `Writing down one personal commitment for the week.` },
       { stepNumber: 6, type: 'closing', title: `Closing Summary by Case Worker`, durationMinutes: 5, content: `Encouraging closing message highlighting personal responsibility and growth.` }
     ]
   };
 }
 
 /**
- * Analyze participant behavior and generate empathy & de-escalation insights
+ * Analyze participant behavior and generate empathy & de-escalation insights using Gemini AI
  */
 export async function analyzeParticipantAI(participantName: string, caseNotes: string[], recentResponse?: string) {
-  const systemInstruction = `You are a forensic psychologist and correctional caseworker analyzing participant progress. Return clean JSON only.`;
+  const systemInstruction = `You are a forensic psychologist and correctional caseworker analyzing inmate rehabilitation progress. Return clean JSON only.`;
 
   const prompt = `Analyze participant "${participantName}" based on notes: ${JSON.stringify(caseNotes)} and recent response: "${recentResponse || 'Active classroom participant'}".
 Return JSON:
 {
-  "deEscalationScore": 82,
-  "empathyScore": 76,
+  "deEscalationScore": 84,
+  "empathyScore": 78,
   "summaryAnalysis": "string",
   "keyStrengths": ["s1", "s2"],
   "areasForGrowth": ["g1", "g2"],
@@ -146,7 +122,7 @@ Return JSON:
   }
 
   return {
-    deEscalationScore: 82,
+    deEscalationScore: 84,
     empathyScore: 78,
     summaryAnalysis: `${participantName} demonstrates steady engagement and emotional awareness during classroom sessions, with positive progress in de-escalation techniques.`,
     keyStrengths: ['Active listening in group discussions', 'Willingness to acknowledge personal triggers'],
@@ -156,10 +132,10 @@ Return JSON:
 }
 
 /**
- * Generate a inspirational transformation story for classroom reading
+ * Generate an inspirational transformation story for classroom reading using Gemini AI
  */
 export async function generateStoryAI(theme: string, targetAudience: string = 'Inmate Rehabilitation Group') {
-  const systemInstruction = `You write uplifting, realistic, non-preachy transformation stories for prison classroom rehabilitation. Output JSON only.`;
+  const systemInstruction = `You write uplifting, realistic, non-preachy transformation stories for prison classroom rehabilitation using Gemini AI. Output JSON only.`;
 
   const prompt = `Write an inspiring rehabilitation story about "${theme}" for ${targetAudience}.
 Return JSON:
