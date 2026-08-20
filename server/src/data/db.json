@@ -1,0 +1,137 @@
+{
+  "users": [
+    {
+      "id": "usr-1",
+      "name": "Priya Rajan",
+      "email": "priya.rajan@kintsu.org",
+      "role": "instructor",
+      "facility": "Central Rehabilitation Facility - Block C",
+      "avatarInitials": "PR"
+    },
+    {
+      "id": "usr-2",
+      "name": "Dr. Sharma",
+      "email": "dr.sharma@kintsu.org",
+      "role": "psychologist",
+      "facility": "Central Rehabilitation Facility",
+      "avatarInitials": "DS"
+    }
+  ],
+  "sessions": [
+    {
+      "id": "sess-101",
+      "title": "Anger Management & De-escalation",
+      "subtitle": "Mastering Emotional Control in High-Pressure Situations",
+      "category": "Anger Management",
+      "scheduledDate": "2026-08-21",
+      "scheduledTime": "10:00 AM",
+      "block": "Block C",
+      "targetCount": 18,
+      "completedCount": 14,
+      "instructorId": "usr-1",
+      "instructorName": "Priya Rajan",
+      "status": "in-progress",
+      "description": "A structured classroom session designed to help participants recognize emotional triggers, practice breathing techniques, and apply de-escalation strategies.",
+      "steps": [
+        {
+          "stepNumber": 1,
+          "type": "video",
+          "title": "Opening Motivational Video: Breaking the Impulse Cycle",
+          "durationMinutes": 7,
+          "content": "A short visual presentation illustrating how emotional responses form and how a 5-second pause can prevent lifetime consequences.",
+          "mediaUrl": "https://cdn.kintsu.org/videos/impulse-control.mp4"
+        },
+        {
+          "stepNumber": 2,
+          "type": "story",
+          "title": "Real-Life Story: Vikram's Turning Point",
+          "durationMinutes": 10,
+          "content": "The journey of a former inmate who mastered emotional discipline after 8 years in prison and built a community youth center."
+        },
+        {
+          "stepNumber": 3,
+          "type": "discussion",
+          "title": "Group Discussion: Recognizing Your Emotional Triggers",
+          "durationMinutes": 15,
+          "content": "Guided discussion led by instructor on identifying internal warning signs before anger escalates.",
+          "questions": [
+            "What physical signs tell you that anger is taking over?",
+            "What would you have done differently in a recent conflict?",
+            "How does remaining calm protect your future?"
+          ]
+        },
+        {
+          "stepNumber": 4,
+          "type": "activity",
+          "title": "Emotional Learning Activity: The 5-4-3-2-1 Calm Routine",
+          "durationMinutes": 10,
+          "content": "Interactive breathing and sensory grounding exercise performed together by all participants."
+        },
+        {
+          "stepNumber": 5,
+          "type": "reflection",
+          "title": "Personal Reflection & Journaling",
+          "durationMinutes": 8,
+          "content": "Participants write down one commitment for the week on how to handle frustration constructively."
+        },
+        {
+          "stepNumber": 6,
+          "type": "closing",
+          "title": "Closing Message: Building Self-Respect Daily",
+          "durationMinutes": 5,
+          "content": "Summary by Priya Rajan emphasizing that self-control is the ultimate sign of strength."
+        }
+      ],
+      "createdAt": "2026-08-15T09:00:00Z",
+      "updatedAt": "2026-08-21T09:30:00Z"
+    }
+  ],
+  "stories": [
+    {
+      "id": "story-1",
+      "title": "The Second Chance of Marcus Vance",
+      "category": "Second Chances",
+      "summary": "After serving 12 years, Marcus committed to learning computer programming and now mentors underprivileged youth.",
+      "fullText": "Marcus Vance spent over a decade reflecting on a single impulsive night that altered his life trajectory...",
+      "authorOrSource": "ReStart Case Studies",
+      "tags": ["Rehabilitation", "Discipline", "Mentorship"],
+      "moral": "Your past explains where you have been, but it never defines where you can go.",
+      "estimatedReadTime": "6 mins",
+      "featured": true,
+      "createdAt": "2026-08-01T08:00:00Z"
+    }
+  ],
+  "books": [
+    {
+      "id": "book-1",
+      "title": "Man's Search for Meaning",
+      "author": "Viktor E. Frankl",
+      "category": "Philosophy",
+      "description": "Psychiatrist Viktor Frankl's memoir of suffering in concentration camps and finding purpose.",
+      "summaryText": "Even in conditions of severe restriction, human beings retain the ultimate freedom: to choose one's attitude.",
+      "audiobookAvailable": true,
+      "recommendedForStage": "Active Healing",
+      "incentiveEligible": true
+    }
+  ],
+  "participants": [
+    {
+      "id": "prt-101",
+      "nameIdentifier": "Participant #101 (Block C)",
+      "block": "Block C",
+      "rehabilitationStage": "Active Healing",
+      "deEscalationScore": 84,
+      "empathyScore": 78,
+      "sessionsAttended": 14,
+      "booksCompleted": 3,
+      "caseWorkerNotes": [
+        "Demonstrates high engagement during group discussions.",
+        "Completed Victor Frankl reading assignment with thoughtful written reflection."
+      ],
+      "lastActiveDate": "2026-08-20"
+    }
+  ],
+  "roleplayScenarios": [],
+  "roleplayLogs": [],
+  "progressEntries": []
+}
