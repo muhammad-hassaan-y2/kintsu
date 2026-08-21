@@ -4,7 +4,7 @@ import jwt
 from fastapi import APIRouter, Depends, HTTPException, Header, status
 from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import Session
-from database import get_db, UserModel, db as legacy_db
+from database import get_db, UserModel
 from config import JWT_SECRET
 
 router = APIRouter(prefix="/api/auth", tags=["Auth"])
@@ -41,7 +41,7 @@ def create_access_token(user_id: int, email: str, role: str) -> str:
     }
     return jwt.encode(payload, JWT_SECRET, algorithm="HS256")
 
-# 1. Sign Up Endpoint (Neon PostgreSQL)
+# 1. Sign Up Endpoint (Exclusively Neon PostgreSQL)
 @router.post("/signup")
 def signup(req: SignupRequest, db: Session = Depends(get_db)):
     email_clean = req.email.strip().lower()
@@ -54,7 +54,7 @@ def signup(req: SignupRequest, db: Session = Depends(get_db)):
             detail="An account with this email address already exists."
         )
 
-    # Hash password and create User record
+    # Hash password and create User record in Neon DB
     hashed_pwd = hash_password(req.password)
     new_user = UserModel(
         email=email_clean,
@@ -72,7 +72,7 @@ def signup(req: SignupRequest, db: Session = Depends(get_db)):
 
     return {
         "success": True,
-        "message": "Account created successfully",
+        "message": "Account created successfully in Neon PostgreSQL",
         "token": token,
         "user": {
             "id": new_user.id,
@@ -83,12 +83,12 @@ def signup(req: SignupRequest, db: Session = Depends(get_db)):
         }
     }
 
-# 2. Log In Endpoint (Neon PostgreSQL)
+# 2. Log In Endpoint (Exclusively Neon PostgreSQL)
 @router.post("/login")
 def login(req: LoginRequest, db: Session = Depends(get_db)):
     email_clean = req.email.strip().lower()
 
-    # Query user from Neon DB
+    # Query user exclusively from Neon DB
     user = db.query(UserModel).filter(UserModel.email == email_clean).first()
     
     if not user or not verify_password(req.password, user.password_hash):
@@ -108,7 +108,7 @@ def login(req: LoginRequest, db: Session = Depends(get_db)):
 
     return {
         "success": True,
-        "message": "Authenticated successfully",
+        "message": "Authenticated successfully with Neon DB",
         "token": token,
         "user": {
             "id": user.id,
@@ -119,20 +119,24 @@ def login(req: LoginRequest, db: Session = Depends(get_db)):
         }
     }
 
-# 3. Get Authenticated User Profile Endpoint
+# 3. Get Authenticated User Profile Endpoint (Neon PostgreSQL)
 @router.get("/me")
 def get_profile(authorization: str = Header(None), db: Session = Depends(get_db)):
     if not authorization or not authorization.startswith("Bearer "):
-        # Fallback for demo mode if no token provided
-        return {
-            "success": True,
-            "user": {
-                "id": 1,
-                "email": "counselor@kintsu.org",
-                "fullName": "Priya Rajan",
-                "role": "counselor"
+        # Query default demo user from Neon DB
+        demo_user = db.query(UserModel).filter(UserModel.email == "demo@kintsu.org").first()
+        if demo_user:
+            return {
+                "success": True,
+                "user": {
+                    "id": demo_user.id,
+                    "email": demo_user.email,
+                    "fullName": demo_user.full_name,
+                    "role": demo_user.role,
+                    "createdAt": demo_user.created_at.isoformat()
+                }
             }
-        }
+        raise HTTPException(status_code=401, detail="Authentication token required")
 
     token = authorization.split(" ")[1]
     try:
@@ -140,7 +144,7 @@ def get_profile(authorization: str = Header(None), db: Session = Depends(get_db)
         user_id = int(payload.get("sub"))
         user = db.query(UserModel).filter(UserModel.id == user_id).first()
         if not user:
-            raise HTTPException(status_code=404, detail="User not found")
+            raise HTTPException(status_code=404, detail="User not found in Neon DB")
 
         return {
             "success": True,
