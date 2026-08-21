@@ -163,13 +163,19 @@ interface SidebarProps {
   currentUser: any;
   onOpenProfile: () => void;
   onLogout: () => void;
+  timeLeft: number;
 }
 
-function Sidebar({ active, setActive, currentUser, onOpenProfile, onLogout }: SidebarProps) {
+function Sidebar({ active, setActive, currentUser, onOpenProfile, onLogout, timeLeft }: SidebarProps) {
   const router = useRouter();
   const userName = currentUser?.fullName || "Priya Rajan";
   const userRole = currentUser?.role || "Counselor";
   const initials = userName.split(" ").map((n: string) => n[0]).join("").toUpperCase();
+
+  const minutes = Math.floor(timeLeft / 60);
+  const seconds = timeLeft % 60;
+  const timeFormatted = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+  const isWarning = timeLeft < 60;
 
   return (
     <aside
@@ -185,7 +191,29 @@ function Sidebar({ active, setActive, currentUser, onOpenProfile, onLogout }: Si
         />
       </div>
 
+      {/* 5-Minute Auto-Logout Countdown Badge */}
+      <div 
+        className="mx-3 mb-4 px-3 py-2 rounded-xl flex items-center justify-between border"
+        style={{
+          backgroundColor: isWarning ? "rgba(239,68,68,0.15)" : "rgba(201,162,39,0.12)",
+          borderColor: isWarning ? "rgba(239,68,68,0.4)" : "rgba(201,162,39,0.3)",
+        }}
+      >
+        <div className="flex items-center gap-2">
+          <Clock className={`w-3.5 h-3.5 ${isWarning ? "text-red-400 animate-bounce" : "text-amber-400"}`} />
+          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-300">
+            Session Timeout:
+          </span>
+        </div>
+        <span 
+          className={`text-xs font-mono font-extrabold ${isWarning ? "text-red-400 animate-pulse" : "text-amber-300"}`}
+        >
+          {timeFormatted}
+        </span>
+      </div>
+
       <p className="px-6 text-[10px] font-bold uppercase tracking-[0.14em] mb-2" style={{ color: T.slate }}>Workspace</p>
+
 
       <nav className="flex flex-col gap-0.5 px-3 flex-1">
         {NAV.map(({ label, icon, zone }) => (
@@ -2038,6 +2066,7 @@ export default function App() {
   const [active, setActive] = useState(1);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [profileModalOpen, setProfileModalOpen] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(300); // 5 minutes = 300 seconds
 
   useEffect(() => {
     async function loadProfile() {
@@ -2052,6 +2081,21 @@ export default function App() {
     }
     loadProfile();
   }, []);
+
+  // 5-Minute Auto-Logout Timer Hook
+  useEffect(() => {
+    if (timeLeft <= 0) {
+      clearAuthToken();
+      router.push("/");
+      return;
+    }
+
+    const timer = setInterval(() => {
+      setTimeLeft(prev => prev - 1);
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [timeLeft, router]);
 
   const handleLogout = () => {
     clearAuthToken();
@@ -2086,6 +2130,7 @@ export default function App() {
           currentUser={currentUser}
           onOpenProfile={() => setProfileModalOpen(true)}
           onLogout={handleLogout}
+          timeLeft={timeLeft}
         />
         <div className="flex-1 flex flex-col min-w-0 overflow-y-auto" style={{ backgroundColor: T.midnight }}>
           <div key={active} className="fade-in" style={{ animationDuration: "350ms" }}>
@@ -2097,4 +2142,5 @@ export default function App() {
     </>
   );
 }
+
 
