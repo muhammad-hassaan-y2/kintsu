@@ -18,7 +18,7 @@ class PrisonerIntakeRequest(BaseModel):
 class NoteRequest(BaseModel):
     note: str
 
-# 1. Create Prisoner Intake File (Neon PostgreSQL)
+# 1. Create Prisoner Intake File (Neon PostgreSQL) - Declared BEFORE dynamic routes
 @router.post("/intake")
 def create_prisoner_intake(req: PrisonerIntakeRequest, db: Session = Depends(get_db)):
     inmate_clean = req.inmate_id.strip().upper()
@@ -60,7 +60,7 @@ def create_prisoner_intake(req: PrisonerIntakeRequest, db: Session = Depends(get
         }
     }
 
-# 2. Get All Prisoner Files (Neon PostgreSQL)
+# 2. Get All Prisoner Files (Neon PostgreSQL) - Declared BEFORE dynamic routes
 @router.get("/files")
 def get_prisoner_files(db: Session = Depends(get_db)):
     files = db.query(PrisonerFileModel).order_by(PrisonerFileModel.created_at.desc()).all()
@@ -82,6 +82,7 @@ def get_prisoner_files(db: Session = Depends(get_db)):
         ]
     }
 
+# 3. General Participants list endpoint
 @router.get("")
 def get_participants(block: Optional[str] = None, stage: Optional[str] = None):
     participants = legacy_db.get_collection("participants")
@@ -92,6 +93,7 @@ def get_participants(block: Optional[str] = None, stage: Optional[str] = None):
         filtered = [p for p in filtered if p.get("rehabilitationStage", "").lower() == stage.lower()]
     return {"success": True, "count": len(filtered), "data": filtered}
 
+# 4. Dynamic route declared LAST
 @router.get("/{participant_id}")
 def get_participant(participant_id: str):
     p = legacy_db.find_by_id("participants", participant_id)
