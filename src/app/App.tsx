@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   CalendarDays, Users, BarChart2, BookOpen, Theater, Settings, HelpCircle,
@@ -197,6 +197,14 @@ function Sidebar({ active, setActive }: { active: number; setActive: (n: number)
             {icon}{label}
           </button>
         ))}
+      </div>
+
+      <div className="mx-3 mb-2 px-3 py-2 rounded-xl flex items-center justify-between" style={{ backgroundColor: "rgba(255,255,255,0.03)", border: `1px solid ${T.border}` }}>
+        <div className="flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: "#22C55E" }} />
+          <span className="text-[11px] font-semibold" style={{ color: T.cream }}>FastAPI Backend Connected</span>
+        </div>
+        <span className="text-[9px] px-1.5 py-0.5 rounded font-mono" style={{ backgroundColor: `${T.gold}22`, color: T.gold }}>:8000</span>
       </div>
 
       <div className="mx-3 mb-5 px-3 py-3 rounded-xl flex items-center gap-3" style={{ backgroundColor: "rgba(255,255,255,0.04)", border: `1px solid ${T.border}` }}>
@@ -568,6 +576,36 @@ function PageSessionBuilder() {
   const [step, setStep] = useState(2);
   const steps = ["Program Type", "Content", "Participants", "Schedule", "Review"];
 
+  const [aiTopic, setAiTopic] = useState("Handling Rejection & Frustration");
+  const [aiCategory, setAiCategory] = useState("Respect & Society");
+  const [targetBlock, setTargetBlock] = useState("Block C");
+  const [loadingAi, setLoadingAi] = useState(false);
+  const [generatedSession, setGeneratedSession] = useState<any>(null);
+  const [publishMessage, setPublishMessage] = useState("");
+
+  const handleGenerateSession = async () => {
+    setLoadingAi(true);
+    setPublishMessage("");
+    try {
+      const data = await generateAISession(aiTopic, aiCategory, targetBlock);
+      setGeneratedSession(data);
+    } catch (err: any) {
+      console.error("AI Generation failed:", err);
+    } finally {
+      setLoadingAi(false);
+    }
+  };
+
+  const handlePublish = async () => {
+    if (!generatedSession) return;
+    try {
+      await publishSession(generatedSession);
+      setPublishMessage("✨ Session published to Today's classroom schedule!");
+    } catch (err: any) {
+      setPublishMessage("Failed to publish session.");
+    }
+  };
+
   const programs = [
     { icon: <Heart size={22} />, title: "Anger Management", desc: "12 sessions · Beginner", color: T.burgundy, selected: true },
     { icon: <Brain size={22} />, title: "Cognitive Skills", desc: "8 sessions · Intermediate", color: "#60A5FA", selected: false },
@@ -575,13 +613,19 @@ function PageSessionBuilder() {
     { icon: <Target size={22} />, title: "Goal Setting", desc: "10 sessions · Beginner", color: T.gold, selected: false },
   ];
 
-  const modules = [
-    { title: "Introduction to Emotions", duration: "45 min", status: "done" },
-    { title: "Identifying Triggers", duration: "60 min", status: "done" },
-    { title: "Coping Techniques — Breathing", duration: "50 min", status: "current" },
-    { title: "Thought Stopping Practice", duration: "55 min", status: "pending" },
-    { title: "Role Play: High Stress Scenarios", duration: "75 min", status: "pending" },
-  ];
+  const modules = generatedSession?.steps
+    ? generatedSession.steps.map((s: any) => ({
+        title: `${s.stepNumber}. ${s.title}`,
+        duration: `${s.durationMinutes} min`,
+        status: s.stepNumber === 1 ? "done" : s.stepNumber === 2 ? "current" : "pending"
+      }))
+    : [
+        { title: "Introduction to Emotions", duration: "45 min", status: "done" },
+        { title: "Identifying Triggers", duration: "60 min", status: "done" },
+        { title: "Coping Techniques — Breathing", duration: "50 min", status: "current" },
+        { title: "Thought Stopping Practice", duration: "55 min", status: "pending" },
+        { title: "Role Play: High Stress Scenarios", duration: "75 min", status: "pending" },
+      ];
 
   return (
     <>
@@ -596,7 +640,7 @@ function PageSessionBuilder() {
             <span className="gold-shimmer">Session Builder</span>
           </h1>
           <p className="mt-3 text-sm fade-up" style={{ color: T.creamDim, maxWidth: 560, animationDelay: "100ms" }}>
-            Design personalized rehabilitation programs with curated content modules, participant groups, and flexible scheduling.
+            Design personalized rehabilitation programs with AI-generated curriculum, curated content modules, and classroom scheduling.
           </p>
           <div className="flex gap-6 mt-8">
             {[
@@ -619,6 +663,62 @@ function PageSessionBuilder() {
 
       <div className="p-6 flex gap-5">
         <div className="flex-1 min-w-0 flex flex-col gap-5">
+
+          {/* ✨ Gemini AI Generator Card */}
+          <div className="fade-up rounded-2xl p-5" style={{ background: `linear-gradient(135deg, ${T.midnight} 0%, rgba(201,162,39,0.1) 100%)`, border: `1px solid ${T.gold}44`, boxShadow: T.cardShadow }}>
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <Sparkles size={18} style={{ color: T.gold }} />
+                <p className="text-sm font-bold" style={{ color: T.cream }}>✨ Gemini AI Curriculum Generator</p>
+              </div>
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded" style={{ backgroundColor: `${T.gold}22`, color: T.gold }}>FastAPI Powered</span>
+            </div>
+            <div className="grid grid-cols-3 gap-3 mb-3">
+              <div>
+                <label className="text-[10px] font-semibold" style={{ color: T.slateL }}>Session Topic</label>
+                <input type="text" value={aiTopic} onChange={e => setAiTopic(e.target.value)}
+                  className="w-full mt-1 px-3 py-1.5 rounded-lg text-xs outline-none"
+                  style={{ backgroundColor: "rgba(255,255,255,0.06)", border: `1px solid ${T.border}`, color: T.cream }} />
+              </div>
+              <div>
+                <label className="text-[10px] font-semibold" style={{ color: T.slateL }}>Category</label>
+                <select value={aiCategory} onChange={e => setAiCategory(e.target.value)}
+                  className="w-full mt-1 px-3 py-1.5 rounded-lg text-xs outline-none cursor-pointer"
+                  style={{ backgroundColor: "rgba(255,255,255,0.06)", border: `1px solid ${T.border}`, color: T.cream }}>
+                  <option>Respect & Society</option><option>Anger Management</option><option>Life After Prison</option><option>Family & Relationships</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-[10px] font-semibold" style={{ color: T.slateL }}>Target Cellblock</label>
+                <select value={targetBlock} onChange={e => setTargetBlock(e.target.value)}
+                  className="w-full mt-1 px-3 py-1.5 rounded-lg text-xs outline-none cursor-pointer"
+                  style={{ backgroundColor: "rgba(255,255,255,0.06)", border: `1px solid ${T.border}`, color: T.cream }}>
+                  <option>Block C</option><option>Block A</option><option>Block B</option><option>Block D</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <button onClick={handleGenerateSession} disabled={loadingAi}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold cursor-pointer transition-all hover:scale-[1.02]"
+                style={{ backgroundColor: T.gold, color: T.navy }}>
+                {loadingAi ? <RefreshCw size={13} className="animate-spin" /> : <Sparkles size={13} />}
+                {loadingAi ? "Generating Curriculum..." : "Generate 6-Step Plan via Gemini"}
+              </button>
+
+              {generatedSession && (
+                <button onClick={handlePublish}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold cursor-pointer transition-all hover:scale-[1.02]"
+                  style={{ backgroundColor: T.green, color: "#fff" }}>
+                  <CheckCircle size={13} />Publish to Schedule
+                </button>
+              )}
+            </div>
+
+            {publishMessage && (
+              <p className="mt-2 text-xs font-semibold" style={{ color: T.gold }}>{publishMessage}</p>
+            )}
+          </div>
           <div className="fade-up rounded-2xl p-5" style={{ backgroundColor: T.midnight, border: `1px solid ${T.border}`, boxShadow: T.cardShadow }}>
             <div className="flex items-center justify-between mb-6">
               <div>
@@ -697,7 +797,7 @@ function PageSessionBuilder() {
                 style={{ color: T.gold }}><GripVertical size={13} />Reorder</button>
             </div>
             <div className="flex flex-col gap-2">
-              {modules.map((m, i) => (
+              {modules.map((m: any, i: number) => (
                 <div key={m.title} className="fade-up flex items-center gap-3 p-3 rounded-xl transition-all cursor-pointer group"
                   style={{
                     animationDelay: `${250 + i * 50}ms`,
@@ -1484,6 +1584,57 @@ function Sparkles(props: any) {
 // ═══════════════════════════════════════════════════════════════════════════
 
 function PageRoleplay() {
+  const [scenariosList, setScenariosList] = useState<any[]>([]);
+  const [selectedScenarioId, setSelectedScenarioId] = useState("scen-101");
+  const [participantName, setParticipantName] = useState("Vikram Sharma (Block C)");
+  const [activeLog, setActiveLog] = useState<any>(null);
+  const [userDialogue, setUserDialogue] = useState("");
+  const [loadingTurn, setLoadingTurn] = useState(false);
+  const [showSimulatorModal, setShowSimulatorModal] = useState(false);
+
+  useEffect(() => {
+    fetchRoleplayScenarios().then(data => {
+      if (data && data.length > 0) {
+        setScenariosList(data);
+        setSelectedScenarioId(data[0].scenarioId);
+      }
+    }).catch(err => console.error(err));
+  }, []);
+
+  const handleStartSimulation = async () => {
+    try {
+      const log = await startRoleplay(selectedScenarioId, participantName);
+      setActiveLog(log);
+      setShowSimulatorModal(true);
+    } catch (err: any) {
+      console.error(err);
+    }
+  };
+
+  const handleSendTurn = async () => {
+    if (!activeLog || !userDialogue.trim()) return;
+    setLoadingTurn(true);
+    try {
+      const res = await submitRoleplayTurn(activeLog.logId, userDialogue);
+      setActiveLog(res.sessionLog || activeLog);
+      setUserDialogue("");
+    } catch (err: any) {
+      console.error(err);
+    } finally {
+      setLoadingTurn(false);
+    }
+  };
+
+  const handleCompleteSession = async () => {
+    if (!activeLog) return;
+    try {
+      const completed = await completeRoleplay(activeLog.logId);
+      setActiveLog(completed);
+    } catch (err: any) {
+      console.error(err);
+    }
+  };
+
   const sessions = [
     { title: "De-escalation — Bar Fight", date: "Jul 24", duration: "22 min", score: 86, block: "C", participants: 8, scenario: "High Conflict", status: "Completed", color: T.green, icon: <Handshake size={18} /> },
     { title: "Family Visit — Tense Reunion", date: "Jul 22", duration: "35 min", score: 72, block: "A", participants: 5, scenario: "Emotional", status: "Completed", color: "#60A5FA", icon: <Heart size={18} /> },
@@ -1503,16 +1654,126 @@ function PageRoleplay() {
             <span className="text-xs" style={{ color: T.slateL }}>24 scenarios · 6 active</span>
           </div>
           <h1 className="font-bold leading-tight fade-up" style={{ fontSize: 40, color: T.cream, letterSpacing: "-0.03em" }}>
-            Roleplay <span className="gold-shimmer">History</span>
+            Roleplay <span className="gold-shimmer">Simulator & History</span>
           </h1>
           <p className="mt-3 text-sm fade-up" style={{ color: T.creamDim, maxWidth: 560, animationDelay: "100ms" }}>
-            Review recorded roleplay sessions, performance scores, and AI feedback to track interpersonal skill development over time.
+            Engage in live AI-driven roleplay simulations powered by Gemini AI to evaluate de-escalation ratings, tone control, and empathy.
           </p>
         </div>
       </div>
 
       <div className="p-6 flex gap-5">
         <div className="flex-1 min-w-0 flex flex-col gap-5">
+
+          {/* 🎭 Interactive Roleplay Launcher Card */}
+          <div className="fade-up rounded-2xl p-5" style={{ background: `linear-gradient(135deg, ${T.midnight} 0%, ${T.burgundy}22 100%)`, border: `1px solid ${T.burgundy}44`, boxShadow: T.cardShadow }}>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <Theater size={20} style={{ color: T.gold }} />
+                <p className="text-sm font-bold" style={{ color: T.cream }}>🎭 Interactive Gemini Roleplay Simulator</p>
+              </div>
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded" style={{ backgroundColor: `${T.gold}22`, color: T.gold }}>FastAPI Gemini Engine</span>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-3 mb-4">
+              <div>
+                <label className="text-[10px] font-semibold" style={{ color: T.slateL }}>Select Practice Scenario</label>
+                <select value={selectedScenarioId} onChange={e => setSelectedScenarioId(e.target.value)}
+                  className="w-full mt-1 px-3 py-2 rounded-xl text-xs outline-none cursor-pointer"
+                  style={{ backgroundColor: "rgba(255,255,255,0.06)", border: `1px solid ${T.border}`, color: T.cream }}>
+                  {scenariosList.map(s => (
+                    <option key={s.scenarioId} value={s.scenarioId}>{s.title} ({s.category})</option>
+                  ))}
+                  <option value="scen-101">De-escalating Block Conflict</option>
+                  <option value="scen-102">Re-entry Job Interview Practice</option>
+                  <option value="scen-103">Authority Figure Interaction</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-[10px] font-semibold" style={{ color: T.slateL }}>Participant Identifier</label>
+                <input type="text" value={participantName} onChange={e => setParticipantName(e.target.value)}
+                  className="w-full mt-1 px-3 py-2 rounded-xl text-xs outline-none"
+                  style={{ backgroundColor: "rgba(255,255,255,0.06)", border: `1px solid ${T.border}`, color: T.cream }} />
+              </div>
+            </div>
+
+            <button onClick={handleStartSimulation}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold cursor-pointer transition-all hover:scale-[1.02]"
+              style={{ backgroundColor: T.gold, color: T.navy, boxShadow: `0 4px 16px ${T.gold}44` }}>
+              <Play size={13} fill={T.navy} />Launch Roleplay Simulation Session
+            </button>
+          </div>
+
+          {/* 💬 Roleplay Simulator Modal / Drawer */}
+          {showSimulatorModal && activeLog && (
+            <div className="fade-up rounded-2xl p-5 relative" style={{ backgroundColor: T.midnight, border: `2px solid ${T.gold}`, boxShadow: T.cardShadow }}>
+              <div className="flex items-center justify-between pb-3 mb-4" style={{ borderBottom: `1px solid ${T.border}` }}>
+                <div>
+                  <p className="text-sm font-bold" style={{ color: T.cream }}>🎭 Active Simulation: {activeLog.scenarioTitle}</p>
+                  <p className="text-[11px]" style={{ color: T.slate }}>Participant: {activeLog.participantName} · Status: <span style={{ color: T.green }}>{activeLog.status}</span></p>
+                </div>
+                <button onClick={() => setShowSimulatorModal(false)} className="p-1 rounded-lg hover:bg-white/10" style={{ color: T.slateL }}><X size={16} /></button>
+              </div>
+
+              {/* Chat turns */}
+              <div className="space-y-3 max-h-80 overflow-y-auto mb-4 pr-1">
+                {activeLog.turns && activeLog.turns.map((t: any, i: number) => (
+                  <div key={i} className="space-y-2">
+                    <div className="flex justify-end">
+                      <div className="max-w-[80%] rounded-2xl px-4 py-2 text-xs" style={{ backgroundColor: T.midnightL, color: T.cream, border: `1px solid ${T.border}` }}>
+                        <p className="font-semibold text-[10px]" style={{ color: T.gold }}>Participant Dialogue:</p>
+                        <p className="mt-0.5">{t.userInput}</p>
+                      </div>
+                    </div>
+                    <div className="flex justify-start">
+                      <div className="max-w-[85%] rounded-2xl px-4 py-3 text-xs" style={{ backgroundColor: "rgba(201,162,39,0.08)", color: T.cream, border: `1px solid ${T.gold}44` }}>
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="font-bold text-[10px]" style={{ color: T.gold }}>Gemini AI Actor Response:</span>
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: `${T.green}22`, color: T.green }}>De-escalation: {t.deEscalationScore}/100</span>
+                        </div>
+                        <p className="leading-relaxed">{t.actorResponse}</p>
+                        {t.empathyFeedback && (
+                          <p className="mt-2 text-[10px] italic border-t pt-1" style={{ borderColor: `${T.gold}22`, color: T.creamDim }}>
+                            💡 Empathy Feedback: {t.empathyFeedback}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+
+                {activeLog.turns?.length === 0 && (
+                  <p className="text-xs text-center py-6" style={{ color: T.slateL }}>Type your opening dialogue response to start de-escalation practice...</p>
+                )}
+              </div>
+
+              {/* Dialogue input */}
+              <div className="flex gap-2">
+                <input type="text" value={userDialogue} onChange={e => setUserDialogue(e.target.value)}
+                  onKeyDown={e => { if (e.key === "Enter") handleSendTurn(); }}
+                  placeholder="Type participant dialogue..."
+                  className="flex-1 px-4 py-2.5 rounded-xl text-xs outline-none"
+                  style={{ backgroundColor: "rgba(255,255,255,0.06)", border: `1px solid ${T.border}`, color: T.cream }} />
+                <button onClick={handleSendTurn} disabled={loadingTurn}
+                  className="px-5 py-2.5 rounded-xl text-xs font-bold cursor-pointer transition-all"
+                  style={{ backgroundColor: T.gold, color: T.navy }}>
+                  {loadingTurn ? "Processing..." : "Send Dialogue"}
+                </button>
+                <button onClick={handleCompleteSession}
+                  className="px-4 py-2.5 rounded-xl text-xs font-bold cursor-pointer"
+                  style={{ backgroundColor: `${T.burgundy}44`, color: T.cream, border: `1px solid ${T.burgundy}` }}>
+                  Complete
+                </button>
+              </div>
+
+              {activeLog.aiAnalysisSummary && (
+                <div className="mt-3 p-3 rounded-xl text-xs" style={{ backgroundColor: `${T.green}18`, border: `1px solid ${T.green}44`, color: T.cream }}>
+                  <p className="font-bold" style={{ color: T.green }}>✨ Session Final Analysis Summary:</p>
+                  <p className="mt-1 text-[11px]">{activeLog.aiAnalysisSummary}</p>
+                </div>
+              )}
+            </div>
+          )}
           <div className="grid grid-cols-3 gap-4 fade-up">
             {[
               { label: "Sessions This Month", value: "47", sub: "+12 vs last month", icon: <Clapperboard size={20} />, color: T.gold, positive: true },
