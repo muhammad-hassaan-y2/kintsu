@@ -48,13 +48,74 @@ def _hash_pwd(password: str) -> str:
     salt = bcrypt.gensalt()
     return bcrypt.hashpw(password.encode("utf-8"), salt).decode("utf-8")
 
-# Create tables and seed demo user & initial prisoner file automatically in Neon PostgreSQL
+# Initial prisoner profiles seed data
+INITIAL_PRISONER_FILES = [
+    {
+        "inmate_id": "INM-4092",
+        "full_name": "Marcus Vance",
+        "security_block": "Block 4B",
+        "risk_level": "Low Risk",
+        "rehab_track": "Conflict De-escalation",
+        "counselor_notes": "Demonstrating strong active listening skills and positive group participation."
+    },
+    {
+        "inmate_id": "K-2847",
+        "full_name": "Vikram Sharma",
+        "security_block": "Block 2A",
+        "risk_level": "Low Risk",
+        "rehab_track": "Emotional Regulation",
+        "counselor_notes": "Consistent attendance in morning mindfulness and emotional awareness sessions."
+    },
+    {
+        "inmate_id": "K-3102",
+        "full_name": "Arjun Patel",
+        "security_block": "Block 4B",
+        "risk_level": "High Risk",
+        "rehab_track": "Anger Management & Impulse Control",
+        "counselor_notes": "Requires structured 1-on-1 counseling before joining large group discussions."
+    },
+    {
+        "inmate_id": "K-2555",
+        "full_name": "Deepak Kumar",
+        "security_block": "Block 1C",
+        "risk_level": "Medium Risk",
+        "rehab_track": "Vocational & Re-entry Readiness",
+        "counselor_notes": "Showing rapid progress in communication modules and peer support groups."
+    },
+    {
+        "inmate_id": "K-3208",
+        "full_name": "Rahul Singh",
+        "security_block": "Block 2A",
+        "risk_level": "Medium Risk",
+        "rehab_track": "Substance & Behavioral Recovery",
+        "counselor_notes": "Engaging actively in roleplay simulators and stress reduction exercises."
+    },
+    {
+        "inmate_id": "K-2719",
+        "full_name": "Manoj Nair",
+        "security_block": "Block 1C",
+        "risk_level": "Low Risk",
+        "rehab_track": "Peer Mentorship & Leadership",
+        "counselor_notes": "Transition-ready candidate preparing for community re-entry program."
+    },
+    {
+        "inmate_id": "K-3301",
+        "full_name": "Suresh Krishnan",
+        "security_block": "Block 4B",
+        "risk_level": "High Risk",
+        "rehab_track": "Cognitive Restructuring",
+        "counselor_notes": "Newly admitted participant assigned to initial intake evaluation."
+    }
+]
+
+# Create tables and seed demo user & prisoner files automatically in Neon PostgreSQL
 try:
     Base.metadata.create_all(bind=engine)
     print("[Database] Connected to Neon PostgreSQL & initialized tables.")
 
-    # Seed Demo User automatically if not present
     seed_db = SessionLocal()
+
+    # Seed Demo User automatically if not present
     demo_user = seed_db.query(UserModel).filter(UserModel.email == "demo@kintsu.org").first()
     if not demo_user:
         new_demo = UserModel(
@@ -67,20 +128,14 @@ try:
         seed_db.commit()
         print("[Database] Seeded demo user: demo@kintsu.org (Password: demo123)")
 
-    # Seed Initial Sample Prisoner File if not present
-    sample_file = seed_db.query(PrisonerFileModel).filter(PrisonerFileModel.inmate_id == "INM-4092").first()
-    if not sample_file:
-        new_sample = PrisonerFileModel(
-            inmate_id="INM-4092",
-            full_name="Marcus Vance",
-            security_block="Block 4B",
-            risk_level="Low Risk",
-            rehab_track="Conflict De-escalation",
-            counselor_notes="Demonstrating strong active listening skills and positive group participation."
-        )
-        seed_db.add(new_sample)
-        seed_db.commit()
-        print("[Database] Seeded sample prisoner file: INM-4092 (Marcus Vance)")
+    # Seed All Prisoner Profiles automatically into Neon DB
+    for prisoner_data in INITIAL_PRISONER_FILES:
+        existing = seed_db.query(PrisonerFileModel).filter(PrisonerFileModel.inmate_id == prisoner_data["inmate_id"]).first()
+        if not existing:
+            new_prisoner = PrisonerFileModel(**prisoner_data)
+            seed_db.add(new_prisoner)
+            seed_db.commit()
+            print(f"[Database] Seeded prisoner file in Neon DB: {prisoner_data['inmate_id']} ({prisoner_data['full_name']})")
 
     seed_db.close()
 except Exception as e:

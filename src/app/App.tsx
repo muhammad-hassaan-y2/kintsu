@@ -974,30 +974,20 @@ function PageMyPrisoners() {
     loadPrisonerFiles();
   }, []);
 
-  const defaultPrisoners = [
-    { initials: "MV", name: "Marcus Vance", id: "INM-4092", block: "Block 4B", prog: 85, risk: "Low", status: "Active", sessions: 42, empathy: 78, color: T.gold, joined: "Mar 2025" },
-    { initials: "VS", name: "Vikram Sharma", id: "K-2847", block: "C", prog: 80, risk: "Low", status: "Active", sessions: 42, empathy: 72, color: "#60A5FA", joined: "Mar 2025" },
-    { initials: "AP", name: "Arjun Patel", id: "K-3102", block: "A", prog: 28, risk: "High", status: "At Risk", sessions: 8, empathy: 28, color: T.burgundy, joined: "Jun 2026" },
-    { initials: "DK", name: "Deepak Kumar", id: "K-2555", block: "B", prog: 70, risk: "Medium", status: "Progress", sessions: 31, empathy: 65, color: T.green, joined: "Jan 2025" },
-    { initials: "RS", name: "Rahul Singh", id: "K-3208", block: "C", prog: 55, risk: "Medium", status: "Active", sessions: 18, empathy: 54, color: T.amber, joined: "Feb 2026" },
-  ];
+  const combinedPrisoners = dbPrisoners.map((p: any) => ({
+    initials: p.fullName ? p.fullName.split(" ").map((n: string) => n[0]).join("").toUpperCase() : "PF",
+    name: p.fullName,
+    id: p.inmateId,
+    block: p.securityBlock,
+    prog: p.riskLevel?.includes("Low") ? 85 : p.riskLevel?.includes("High") ? 35 : 65,
+    risk: p.riskLevel?.includes("Low") ? "Low" : p.riskLevel?.includes("High") ? "High" : "Medium",
+    status: "Neon DB",
+    sessions: 18,
+    empathy: p.riskLevel?.includes("Low") ? 78 : p.riskLevel?.includes("High") ? 32 : 64,
+    color: p.riskLevel?.includes("Low") ? T.gold : p.riskLevel?.includes("High") ? T.burgundy : T.amber,
+    joined: new Date(p.createdAt || Date.now()).toLocaleDateString()
+  }));
 
-  const combinedPrisoners = [
-    ...dbPrisoners.map((p: any) => ({
-      initials: p.fullName ? p.fullName.split(" ").map((n: string) => n[0]).join("").toUpperCase() : "PF",
-      name: p.fullName,
-      id: p.inmateId,
-      block: p.securityBlock,
-      prog: 65,
-      risk: p.riskLevel?.includes("Low") ? "Low" : p.riskLevel?.includes("High") ? "High" : "Medium",
-      status: "Neon DB",
-      sessions: 12,
-      empathy: 70,
-      color: T.gold,
-      joined: new Date(p.createdAt || Date.now()).toLocaleDateString()
-    })),
-    ...defaultPrisoners
-  ];
 
   const riskColor: Record<string, string> = { Low: T.green, Medium: T.amber, High: T.burgundy };
   const statusColor: Record<string, string> = { "Neon DB": T.gold, Active: "#60A5FA", "At Risk": T.burgundy, Progress: T.green, Graduating: T.gold, New: "#EF4444" };
