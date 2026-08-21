@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { X, Lock, Mail, User, ArrowRight, ShieldCheck, CheckCircle } from "lucide-react";
+import { X, Lock, Mail, User, ArrowRight, ShieldCheck, CheckCircle, AlertCircle } from "lucide-react";
+import { loginUser, signupUser } from "@/lib/api";
 
 const T = {
   navy:      "#0A1628",
@@ -29,16 +30,27 @@ export function AuthModal({ isOpen, onClose, defaultTab = "login", onSuccess }: 
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setTimeout(() => {
+    setErrorMessage("");
+
+    try {
+      if (tab === "login") {
+        await loginUser(email, password);
+      } else {
+        await signupUser(email, password, name || "Counselor");
+      }
       setIsSubmitting(false);
       onSuccess();
-    }, 600);
+    } catch (err: any) {
+      setIsSubmitting(false);
+      setErrorMessage(err.message || "Authentication failed. Please check your details.");
+    }
   };
 
   return (
@@ -68,14 +80,14 @@ export function AuthModal({ isOpen, onClose, defaultTab = "login", onSuccess }: 
             {tab === "login" ? "Welcome Back to Kintsu" : "Create your Kintsu Account"}
           </h2>
           <p className="text-sm mt-1" style={{ color: T.slateL }}>
-            {tab === "login" ? "Access your design system and intelligence dashboard" : "Join leading design teams building unified systems"}
+            {tab === "login" ? "Access your design system and intelligence dashboard" : "Join leading rehabilitation officers & counselors"}
           </p>
         </div>
 
         {/* Tab Switcher */}
         <div className="flex p-1 rounded-xl mb-6 border" style={{ backgroundColor: T.navy, borderColor: T.border }}>
           <button
-            onClick={() => setTab("login")}
+            onClick={() => { setTab("login"); setErrorMessage(""); }}
             className="flex-1 py-2 text-sm font-semibold rounded-lg transition-all"
             style={{
               backgroundColor: tab === "login" ? T.gold : "transparent",
@@ -85,7 +97,7 @@ export function AuthModal({ isOpen, onClose, defaultTab = "login", onSuccess }: 
             Log In
           </button>
           <button
-            onClick={() => setTab("signup")}
+            onClick={() => { setTab("signup"); setErrorMessage(""); }}
             className="flex-1 py-2 text-sm font-semibold rounded-lg transition-all"
             style={{
               backgroundColor: tab === "signup" ? T.gold : "transparent",
@@ -95,6 +107,14 @@ export function AuthModal({ isOpen, onClose, defaultTab = "login", onSuccess }: 
             Sign Up
           </button>
         </div>
+
+        {/* Error Alert Banner */}
+        {errorMessage && (
+          <div className="mb-4 p-3 rounded-xl border bg-red-950/60 border-red-500/40 text-red-300 text-xs flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 shrink-0 text-red-400" />
+            <span>{errorMessage}</span>
+          </div>
+        )}
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -108,7 +128,7 @@ export function AuthModal({ isOpen, onClose, defaultTab = "login", onSuccess }: 
                 <input
                   type="text"
                   required
-                  placeholder="Hassaan"
+                  placeholder="Priya Rajan"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   className="w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm focus:outline-none transition-all"
@@ -131,7 +151,7 @@ export function AuthModal({ isOpen, onClose, defaultTab = "login", onSuccess }: 
               <input
                 type="email"
                 required
-                placeholder="name@kintsu.design"
+                placeholder="admin@kintsu.org"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm focus:outline-none transition-all"
@@ -179,14 +199,14 @@ export function AuthModal({ isOpen, onClose, defaultTab = "login", onSuccess }: 
           ) : (
             <div className="text-xs flex items-center gap-2" style={{ color: T.slateL }}>
               <CheckCircle className="w-4 h-4" style={{ color: T.gold }} />
-              <span>Includes 14-day free trial of Pro Design Tokens</span>
+              <span>Connects securely to Neon PostgreSQL database</span>
             </div>
           )}
 
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full py-3 mt-2 rounded-xl text-sm font-bold flex items-center justify-center gap-2 shadow-lg transition-transform active:scale-95"
+            className="w-full py-3 mt-2 rounded-xl text-sm font-bold flex items-center justify-center gap-2 shadow-lg transition-transform active:scale-95 cursor-pointer"
             style={{
               backgroundColor: T.gold,
               color: T.navy,
@@ -194,7 +214,7 @@ export function AuthModal({ isOpen, onClose, defaultTab = "login", onSuccess }: 
             }}
           >
             {isSubmitting ? (
-              <span>Authenticating...</span>
+              <span>Authenticating with Neon DB...</span>
             ) : (
               <>
                 <span>{tab === "login" ? "Enter Dashboard" : "Create Account & Enter"}</span>

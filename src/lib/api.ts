@@ -29,6 +29,40 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+// AUTHENTICATION API (Neon PostgreSQL + FastAPI)
+// ═══════════════════════════════════════════════════════════════════════════
+
+export async function loginUser(email: string, password: string) {
+
+  const res = await request<any>("/auth/login", {
+    method: "POST",
+    body: JSON.stringify({ email, password }),
+  });
+  if (res.token) {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("kintsu_token", res.token);
+      localStorage.setItem("kintsu_user", JSON.stringify(res.user));
+    }
+  }
+  return res;
+}
+
+export async function signupUser(email: string, password: string, fullName: string, role: string = "counselor") {
+  const res = await request<any>("/auth/signup", {
+    method: "POST",
+    body: JSON.stringify({ email, password, full_name: fullName, role }),
+  });
+  if (res.token) {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("kintsu_token", res.token);
+      localStorage.setItem("kintsu_user", JSON.stringify(res.user));
+    }
+  }
+  return res;
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════════
 // SESSIONS API
 // ═══════════════════════════════════════════════════════════════════════════
 

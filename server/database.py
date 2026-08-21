@@ -1,7 +1,50 @@
 import os
 import json
+import datetime
 from typing import Dict, Any, List, Optional
+from sqlalchemy import create_engine, Column, Integer, String, DateTime, Boolean
+from sqlalchemy.orm import sessionmaker, declarative_base
+from config import DATABASE_URL
 
+# SQLAlchemy Setup for Neon PostgreSQL
+engine = create_engine(
+    DATABASE_URL,
+    pool_size=10,
+    max_overflow=20,
+    pool_pre_ping=True
+)
+
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+Base = declarative_base()
+
+# SQLAlchemy User Model for Neon DB
+class UserModel(Base):
+    __tablename__ = "users"
+
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    email = Column(String(255), unique=True, index=True, nullable=False)
+    password_hash = Column(String(255), nullable=False)
+    full_name = Column(String(255), nullable=False)
+    role = Column(String(50), default="counselor")
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    is_active = Column(Boolean, default=True)
+
+# Create tables automatically in Neon PostgreSQL
+try:
+    Base.metadata.create_all(bind=engine)
+    print("[Database] Successfully connected to Neon PostgreSQL and initialized tables.")
+except Exception as e:
+    print(f"[Database Warning] Could not initialize Neon PostgreSQL tables: {e}")
+
+# Database Session Dependency for FastAPI
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+# Legacy JsonDatabase for local fallback & mock collections
 DB_FILE_PATH = os.path.join(os.path.dirname(__file__), "data", "db.json")
 
 class JsonDatabase:
@@ -61,14 +104,5 @@ class JsonDatabase:
                 self._save_db()
                 return updated_item
         return None
-
-    def delete(self, collection_name: str, id_value: str) -> bool:
-        items = self.get_collection(collection_name)
-        for i, item in enumerate(items):
-            if item.get("id") == id_value or item.get("draftId") == id_value or item.get("scenarioId") == id_value or item.get("logId") == id_value:
-                self.data[collection_name].pop(i)
-                self._save_db()
-                return True
-        return False
 
 db = JsonDatabase()
