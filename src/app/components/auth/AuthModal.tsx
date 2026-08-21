@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { X, Lock, Mail, User, ArrowRight, ShieldCheck, CheckCircle, AlertCircle } from "lucide-react";
-import { loginUser, signupUser } from "@/lib/api";
+import { X, Lock, Mail, User, ArrowRight, ShieldCheck, CheckCircle, AlertCircle, Sparkles } from "lucide-react";
+import { loginUser, signupUser, demoLogin } from "@/lib/api";
 
 const T = {
   navy:      "#0A1628",
@@ -53,6 +53,19 @@ export function AuthModal({ isOpen, onClose, defaultTab = "login", onSuccess }: 
     }
   };
 
+  const handleDemoLogin = async () => {
+    setIsSubmitting(true);
+    setErrorMessage("");
+    try {
+      await demoLogin();
+      setIsSubmitting(false);
+      onSuccess();
+    } catch (err: any) {
+      setIsSubmitting(false);
+      setErrorMessage(err.message || "Demo login failed.");
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm fade-in">
       <div 
@@ -80,9 +93,25 @@ export function AuthModal({ isOpen, onClose, defaultTab = "login", onSuccess }: 
             {tab === "login" ? "Welcome Back to Kintsu" : "Create your Kintsu Account"}
           </h2>
           <p className="text-sm mt-1" style={{ color: T.slateL }}>
-            {tab === "login" ? "Access your design system and intelligence dashboard" : "Join leading rehabilitation officers & counselors"}
+            {tab === "login" ? "Access your rehabilitation & counseling workspace" : "Join leading rehabilitation officers & counselors"}
           </p>
         </div>
+
+        {/* One-Click Demo User Button */}
+        <button
+          type="button"
+          onClick={handleDemoLogin}
+          disabled={isSubmitting}
+          className="w-full py-2.5 mb-5 rounded-xl border text-xs font-bold flex items-center justify-center gap-2 transition-all hover:bg-amber-500/20 active:scale-95 cursor-pointer"
+          style={{
+            borderColor: T.gold,
+            color: T.gold,
+            backgroundColor: "rgba(201,162,39,0.1)",
+          }}
+        >
+          <Sparkles className="w-3.5 h-3.5" />
+          <span>One-Click Demo Account Login (demo@kintsu.org)</span>
+        </button>
 
         {/* Tab Switcher */}
         <div className="flex p-1 rounded-xl mb-6 border" style={{ backgroundColor: T.navy, borderColor: T.border }}>
@@ -151,7 +180,7 @@ export function AuthModal({ isOpen, onClose, defaultTab = "login", onSuccess }: 
               <input
                 type="email"
                 required
-                placeholder="admin@kintsu.org"
+                placeholder="demo@kintsu.org"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm focus:outline-none transition-all"

@@ -1,6 +1,7 @@
 import os
 import json
 import datetime
+import bcrypt
 from typing import Dict, Any, List, Optional
 from sqlalchemy import create_engine, Column, Integer, String, DateTime, Boolean
 from sqlalchemy.orm import sessionmaker, declarative_base
@@ -29,12 +30,32 @@ class UserModel(Base):
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     is_active = Column(Boolean, default=True)
 
-# Create tables automatically in Neon PostgreSQL
+# Helper function to hash passwords
+def _hash_pwd(password: str) -> str:
+    salt = bcrypt.gensalt()
+    return bcrypt.hashpw(password.encode("utf-8"), salt).decode("utf-8")
+
+# Create tables and seed demo user automatically in Neon PostgreSQL
 try:
     Base.metadata.create_all(bind=engine)
-    print("[Database] Successfully connected to Neon PostgreSQL and initialized tables.")
+    print("[Database] Connected to Neon PostgreSQL & initialized tables.")
+
+    # Seed Demo User automatically if not present
+    seed_db = SessionLocal()
+    demo_user = seed_db.query(UserModel).filter(UserModel.email == "demo@kintsu.org").first()
+    if not demo_user:
+        new_demo = UserModel(
+            email="demo@kintsu.org",
+            password_hash=_hash_pwd("demo123"),
+            full_name="Demo Counselor",
+            role="counselor"
+        )
+        seed_db.add(new_demo)
+        seed_db.commit()
+        print("[Database] Seeded demo user: demo@kintsu.org (Password: demo123)")
+    seed_db.close()
 except Exception as e:
-    print(f"[Database Warning] Could not initialize Neon PostgreSQL tables: {e}")
+    print(f"[Database Warning] Could not initialize Neon PostgreSQL tables or seed demo user: {e}")
 
 # Database Session Dependency for FastAPI
 def get_db():
