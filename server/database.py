@@ -30,12 +30,25 @@ class UserModel(Base):
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     is_active = Column(Boolean, default=True)
 
+# SQLAlchemy Prisoner File Model for Neon DB
+class PrisonerFileModel(Base):
+    __tablename__ = "prisoner_files"
+
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    inmate_id = Column(String(100), unique=True, index=True, nullable=False)
+    full_name = Column(String(255), nullable=False)
+    security_block = Column(String(100), default="Block 4B")
+    risk_level = Column(String(50), default="Low Risk")
+    rehab_track = Column(String(100), default="Emotional Regulation")
+    counselor_notes = Column(String(1000), nullable=True)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+
 # Helper function to hash passwords
 def _hash_pwd(password: str) -> str:
     salt = bcrypt.gensalt()
     return bcrypt.hashpw(password.encode("utf-8"), salt).decode("utf-8")
 
-# Create tables and seed demo user automatically in Neon PostgreSQL
+# Create tables and seed demo user & initial prisoner file automatically in Neon PostgreSQL
 try:
     Base.metadata.create_all(bind=engine)
     print("[Database] Connected to Neon PostgreSQL & initialized tables.")
@@ -53,9 +66,25 @@ try:
         seed_db.add(new_demo)
         seed_db.commit()
         print("[Database] Seeded demo user: demo@kintsu.org (Password: demo123)")
+
+    # Seed Initial Sample Prisoner File if not present
+    sample_file = seed_db.query(PrisonerFileModel).filter(PrisonerFileModel.inmate_id == "INM-4092").first()
+    if not sample_file:
+        new_sample = PrisonerFileModel(
+            inmate_id="INM-4092",
+            full_name="Marcus Vance",
+            security_block="Block 4B",
+            risk_level="Low Risk",
+            rehab_track="Conflict De-escalation",
+            counselor_notes="Demonstrating strong active listening skills and positive group participation."
+        )
+        seed_db.add(new_sample)
+        seed_db.commit()
+        print("[Database] Seeded sample prisoner file: INM-4092 (Marcus Vance)")
+
     seed_db.close()
 except Exception as e:
-    print(f"[Database Warning] Could not initialize Neon PostgreSQL tables or seed demo user: {e}")
+    print(f"[Database Warning] Could not initialize Neon PostgreSQL tables or seed data: {e}")
 
 # Database Session Dependency for FastAPI
 def get_db():
@@ -81,7 +110,6 @@ class JsonDatabase:
             print(f"Warning: Failed to load db.json, using defaults: {e}")
 
         return {
-            "users": [],
             "sessions": [],
             "stories": [],
             "books": [],

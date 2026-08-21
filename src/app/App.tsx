@@ -25,9 +25,12 @@ import {
   fetchRoleplayScenarios,
   startRoleplay,
   submitRoleplayTurn,
-  completeRoleplay
+  completeRoleplay,
+  fetchPrisonerFiles
 } from "@/lib/api";
+import { PrisonerIntakeWizard } from "@/app/components/onboarding/PrisonerIntakeWizard";
 const kintsuLogo = "/kintsu-logo.png";
+
 
 
 
@@ -899,33 +902,72 @@ function Lightbulb(props: any) {
 // ═══════════════════════════════════════════════════════════════════════════
 
 function PageMyPrisoners() {
-  const prisoners = [
+  const [intakeWizardOpen, setIntakeWizardOpen] = useState(false);
+  const [dbPrisoners, setDbPrisoners] = useState<any[]>([]);
+
+  const loadPrisonerFiles = async () => {
+    try {
+      const res = await fetchPrisonerFiles();
+      if (res && res.data) {
+        setDbPrisoners(res.data);
+      }
+    } catch (err) {
+      console.warn("Could not load Neon DB prisoner files:", err);
+    }
+  };
+
+  useEffect(() => {
+    loadPrisonerFiles();
+  }, []);
+
+  const defaultPrisoners = [
+    { initials: "MV", name: "Marcus Vance", id: "INM-4092", block: "Block 4B", prog: 85, risk: "Low", status: "Active", sessions: 42, empathy: 78, color: T.gold, joined: "Mar 2025" },
     { initials: "VS", name: "Vikram Sharma", id: "K-2847", block: "C", prog: 80, risk: "Low", status: "Active", sessions: 42, empathy: 72, color: "#60A5FA", joined: "Mar 2025" },
     { initials: "AP", name: "Arjun Patel", id: "K-3102", block: "A", prog: 28, risk: "High", status: "At Risk", sessions: 8, empathy: 28, color: T.burgundy, joined: "Jun 2026" },
     { initials: "DK", name: "Deepak Kumar", id: "K-2555", block: "B", prog: 70, risk: "Medium", status: "Progress", sessions: 31, empathy: 65, color: T.green, joined: "Jan 2025" },
     { initials: "RS", name: "Rahul Singh", id: "K-3208", block: "C", prog: 55, risk: "Medium", status: "Active", sessions: 18, empathy: 54, color: T.amber, joined: "Feb 2026" },
-    { initials: "MN", name: "Manoj Nair", id: "K-2719", block: "D", prog: 92, risk: "Low", status: "Graduating", sessions: 58, empathy: 88, color: T.gold, joined: "Nov 2024" },
-    { initials: "SK", name: "Suresh Krishnan", id: "K-3301", block: "A", prog: 15, risk: "High", status: "New", sessions: 3, empathy: 22, color: "#EF4444", joined: "Jul 2026" },
+  ];
+
+  const combinedPrisoners = [
+    ...dbPrisoners.map((p: any) => ({
+      initials: p.fullName ? p.fullName.split(" ").map((n: string) => n[0]).join("").toUpperCase() : "PF",
+      name: p.fullName,
+      id: p.inmateId,
+      block: p.securityBlock,
+      prog: 65,
+      risk: p.riskLevel?.includes("Low") ? "Low" : p.riskLevel?.includes("High") ? "High" : "Medium",
+      status: "Neon DB",
+      sessions: 12,
+      empathy: 70,
+      color: T.gold,
+      joined: new Date(p.createdAt || Date.now()).toLocaleDateString()
+    })),
+    ...defaultPrisoners
   ];
 
   const riskColor: Record<string, string> = { Low: T.green, Medium: T.amber, High: T.burgundy };
-  const statusColor: Record<string, string> = { Active: "#60A5FA", "At Risk": T.burgundy, Progress: T.green, Graduating: T.gold, New: "#EF4444" };
+  const statusColor: Record<string, string> = { "Neon DB": T.gold, Active: "#60A5FA", "At Risk": T.burgundy, Progress: T.green, Graduating: T.gold, New: "#EF4444" };
 
   return (
     <>
+      <PrisonerIntakeWizard 
+        isOpen={intakeWizardOpen} 
+        onClose={() => setIntakeWizardOpen(false)} 
+        onSuccess={loadPrisonerFiles}
+      />
       <div className="page-hero">
         <div className="relative z-10">
           <div className="flex items-center gap-2 mb-3 fade-in">
             <span className="text-[11px] font-bold uppercase tracking-widest px-3 py-1 rounded-full"
               style={{ backgroundColor: `${"#60A5FA"}22`, color: "#60A5FA" }}>Case Load</span>
-            <span className="text-xs" style={{ color: T.slateL }}>6 active cases</span>
+            <span className="text-xs" style={{ color: T.slateL }}>{combinedPrisoners.length} active prisoner files</span>
           </div>
           <h1 className="font-bold leading-tight fade-up" style={{ fontSize: 40, color: T.cream, letterSpacing: "-0.03em" }}>
-            <span style={{ color: T.cream }}>My </span>
-            <span className="gold-shimmer">Prisoners</span>
+            <span style={{ color: T.cream }}>Prisoner </span>
+            <span className="gold-shimmer">Rehabilitation Files</span>
           </h1>
           <p className="mt-3 text-sm fade-up" style={{ color: T.creamDim, maxWidth: 560, animationDelay: "100ms" }}>
-            Track rehabilitation progress, manage intervention plans, and monitor empathy scores for each participant under your care.
+            Create, track, and manage confidential prisoner rehabilitation intake files stored securely in Neon PostgreSQL.
           </p>
         </div>
       </div>
@@ -942,20 +984,23 @@ function PageMyPrisoners() {
                 </div>
                 <select className="px-3 py-2 rounded-xl text-xs outline-none cursor-pointer"
                   style={{ backgroundColor: "rgba(255,255,255,0.04)", border: `1px solid ${T.border}`, color: T.slateL }}>
-                  <option>All Blocks</option><option>Block A</option><option>Block B</option><option>Block C</option><option>Block D</option>
-                </select>
-                <select className="px-3 py-2 rounded-xl text-xs outline-none cursor-pointer"
-                  style={{ backgroundColor: "rgba(255,255,255,0.04)", border: `1px solid ${T.border}`, color: T.slateL }}>
-                  <option>All Risks</option><option>Low Risk</option><option>Medium Risk</option><option>High Risk</option>
+                  <option>All Blocks</option><option>Block 4B</option><option>Block 2A</option><option>Block 1C</option>
                 </select>
               </div>
               <div className="flex items-center gap-2">
-                <button className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold cursor-pointer hover:opacity-90 transition-opacity"
-                  style={{ backgroundColor: T.gold, color: T.navy }}><UserPlus size={13} />Add Participant</button>
+                <button 
+                  onClick={() => setIntakeWizardOpen(true)}
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold cursor-pointer hover:opacity-90 transition-all active:scale-95 shadow-lg"
+                  style={{ backgroundColor: T.gold, color: T.navy }}
+                >
+                  <UserPlus size={14} />
+                  <span>+ Intake Prisoner File (Neon DB)</span>
+                </button>
                 <button className="p-2 rounded-xl cursor-pointer hover:bg-white/5 transition-colors"
                   style={{ border: `1px solid ${T.border}`, color: T.slate }}><Download size={14} /></button>
               </div>
             </div>
+
 
             <div className="overflow-hidden rounded-xl" style={{ border: `1px solid ${T.border}` }}>
               <div className="grid grid-cols-12 gap-4 px-4 py-3 text-[10px] font-bold uppercase tracking-wider"
@@ -968,7 +1013,8 @@ function PageMyPrisoners() {
                 <div className="col-span-2">Status</div>
                 <div className="col-span-2 text-right">Actions</div>
               </div>
-              {prisoners.map((p, i) => (
+              {combinedPrisoners.map((p, i) => (
+
                 <div key={p.id} className="grid grid-cols-12 gap-4 items-center px-4 py-4 fade-up transition-colors cursor-pointer"
                   style={{
                     animationDelay: `${100 + i * 60}ms`,

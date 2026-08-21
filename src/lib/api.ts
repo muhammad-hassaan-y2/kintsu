@@ -50,6 +50,29 @@ export async function demoLogin() {
   return loginUser("demo@kintsu.org", "demo123");
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// PRISONER FILE & INTAKE API (Neon PostgreSQL)
+// ═══════════════════════════════════════════════════════════════════════════
+
+export async function createPrisonerIntake(data: {
+  inmate_id: string;
+  full_name: string;
+  security_block?: string;
+  risk_level?: string;
+  rehab_track?: string;
+  counselor_notes?: string;
+}) {
+  return request<any>("/participants/intake", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export async function fetchPrisonerFiles() {
+  return request<any>("/participants/files");
+}
+
+
 
 
 // ═══════════════════════════════════════════════════════════════════════════
