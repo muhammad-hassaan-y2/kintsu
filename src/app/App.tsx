@@ -26,10 +26,14 @@ import {
   startRoleplay,
   submitRoleplayTurn,
   completeRoleplay,
-  fetchPrisonerFiles
+  fetchPrisonerFiles,
+  fetchCurrentUser,
+  clearAuthToken
 } from "@/lib/api";
 import { PrisonerIntakeWizard } from "@/app/components/onboarding/PrisonerIntakeWizard";
+import { UserProfileModal } from "@/app/components/auth/UserProfileModal";
 const kintsuLogo = "/kintsu-logo.png";
+
 
 
 
@@ -153,8 +157,20 @@ const NAV = [
   { label: "Roleplay History",    icon: <Theater      size={17} />, zone: 6 },
 ];
 
-function Sidebar({ active, setActive }: { active: number; setActive: (n: number) => void }) {
+interface SidebarProps {
+  active: number;
+  setActive: (n: number) => void;
+  currentUser: any;
+  onOpenProfile: () => void;
+  onLogout: () => void;
+}
+
+function Sidebar({ active, setActive, currentUser, onOpenProfile, onLogout }: SidebarProps) {
   const router = useRouter();
+  const userName = currentUser?.fullName || "Priya Rajan";
+  const userRole = currentUser?.role || "Counselor";
+  const initials = userName.split(" ").map((n: string) => n[0]).join("").toUpperCase();
+
   return (
     <aside
       className="flex flex-col h-screen sticky top-0 shrink-0"
@@ -205,24 +221,32 @@ function Sidebar({ active, setActive }: { active: number; setActive: (n: number)
       <div className="mx-3 mb-2 px-3 py-2 rounded-xl flex items-center justify-between" style={{ backgroundColor: "rgba(255,255,255,0.03)", border: `1px solid ${T.border}` }}>
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: "#22C55E" }} />
-          <span className="text-[11px] font-semibold" style={{ color: T.cream }}>FastAPI Backend Connected</span>
+          <span className="text-[11px] font-semibold" style={{ color: T.cream }}>Neon DB & FastAPI</span>
         </div>
         <span className="text-[9px] px-1.5 py-0.5 rounded font-mono" style={{ backgroundColor: `${T.gold}22`, color: T.gold }}>:8000</span>
       </div>
 
-      <div className="mx-3 mb-5 px-3 py-3 rounded-xl flex items-center gap-3" style={{ backgroundColor: "rgba(255,255,255,0.04)", border: `1px solid ${T.border}` }}>
-        <Avatar initials="PR" size={36} bg={T.midnight} />
+      {/* User Profile Card */}
+      <div 
+        onClick={onOpenProfile}
+        className="mx-3 mb-5 px-3 py-3 rounded-xl flex items-center gap-3 cursor-pointer transition-all hover:bg-white/10 active:scale-95 group" 
+        style={{ backgroundColor: "rgba(255,255,255,0.04)", border: `1px solid ${T.border}` }}
+      >
+        <Avatar initials={initials} size={36} bg={T.midnight} />
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold truncate" style={{ color: T.cream }}>Priya Rajan</p>
+          <p className="text-sm font-semibold truncate group-hover:text-amber-400 transition-colors" style={{ color: T.cream }}>{userName}</p>
           <div className="flex items-center gap-1.5 mt-0.5">
             <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: "#22C55E" }} />
-            <p className="text-[11px]" style={{ color: T.slate }}>Online · Case Worker</p>
+            <p className="text-[11px] capitalize" style={{ color: T.slate }}>Online · {userRole}</p>
           </div>
         </div>
         <button 
-          onClick={() => router.push("/")}
-          title="Log Out & Return to Landing Page"
-          className="p-1.5 rounded-lg text-gray-400 hover:text-amber-400 hover:bg-white/10 transition-colors"
+          onClick={(e) => {
+            e.stopPropagation();
+            onLogout();
+          }}
+          title="Log Out & Exit"
+          className="p-1.5 rounded-lg text-gray-400 hover:text-red-400 hover:bg-white/10 transition-colors cursor-pointer"
         >
           <LogOut size={16} />
         </button>
@@ -230,6 +254,7 @@ function Sidebar({ active, setActive }: { active: number; setActive: (n: number)
     </aside>
   );
 }
+
 
 
 function Footer() {
@@ -590,7 +615,8 @@ function PageSessionBuilder() {
     setLoadingAi(true);
     setPublishMessage("");
     try {
-      const data = await generateAISession(aiTopic, aiCategory, targetBlock);
+      const data = await generateAISession({ topic: aiTopic, targetGroup: targetBlock });
+
       setGeneratedSession(data);
     } catch (err: any) {
       console.error("AI Generation failed:", err);
@@ -2008,7 +2034,29 @@ function PageRoleplay() {
 // ═══════════════════════════════════════════════════════════════════════════
 
 export default function App() {
+  const router = useRouter();
   const [active, setActive] = useState(1);
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [profileModalOpen, setProfileModalOpen] = useState(false);
+
+  useEffect(() => {
+    async function loadProfile() {
+      try {
+        const res = await fetchCurrentUser();
+        if (res && res.user) {
+          setCurrentUser(res.user);
+        }
+      } catch (err) {
+        console.warn("Could not fetch logged-in user profile:", err);
+      }
+    }
+    loadProfile();
+  }, []);
+
+  const handleLogout = () => {
+    clearAuthToken();
+    router.push("/");
+  };
 
   const renderPage = () => {
     switch (active) {
@@ -2025,8 +2073,20 @@ export default function App() {
   return (
     <>
       <Styles />
+      <UserProfileModal
+        isOpen={profileModalOpen}
+        onClose={() => setProfileModalOpen(false)}
+        user={currentUser || { fullName: "Priya Rajan", email: "demo@kintsu.org", role: "Counselor" }}
+        onLogout={handleLogout}
+      />
       <div className="flex min-h-screen" style={{ backgroundColor: T.midnight, fontFamily: "Inter, sans-serif" }}>
-        <Sidebar active={active} setActive={setActive} />
+        <Sidebar 
+          active={active} 
+          setActive={setActive} 
+          currentUser={currentUser}
+          onOpenProfile={() => setProfileModalOpen(true)}
+          onLogout={handleLogout}
+        />
         <div className="flex-1 flex flex-col min-w-0 overflow-y-auto" style={{ backgroundColor: T.midnight }}>
           <div key={active} className="fade-in" style={{ animationDuration: "350ms" }}>
             {renderPage()}
@@ -2037,3 +2097,4 @@ export default function App() {
     </>
   );
 }
+

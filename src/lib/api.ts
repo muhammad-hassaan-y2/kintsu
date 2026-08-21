@@ -1,23 +1,41 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
 
+let inMemoryToken: string | null = null;
+
+export function setAuthToken(token: string) {
+  inMemoryToken = token;
+}
+
+export function getAuthToken(): string | null {
+  return inMemoryToken;
+}
+
+export function clearAuthToken() {
+  inMemoryToken = null;
+}
+
 async function request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`;
-  const defaultHeaders = {
+  const headers: Record<string, string> = {
     "Content-Type": "application/json",
   };
+
+  if (inMemoryToken) {
+    headers["Authorization"] = `Bearer ${inMemoryToken}`;
+  }
 
   try {
     const res = await fetch(url, {
       ...options,
       headers: {
-        ...defaultHeaders,
+        ...headers,
         ...options.headers,
       },
     });
 
     if (!res.ok) {
       const errorData = await res.json().catch(() => ({}));
-      throw new Error(errorData.message || `API error (${res.status}): ${res.statusText}`);
+      throw new Error(errorData.detail || errorData.message || `API error (${res.status}): ${res.statusText}`);
     }
 
     const json = await res.json();
@@ -33,21 +51,33 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
 // ═══════════════════════════════════════════════════════════════════════════
 
 export async function loginUser(email: string, password: string) {
-  return request<any>("/auth/login", {
+  const res = await request<any>("/auth/login", {
     method: "POST",
     body: JSON.stringify({ email, password }),
   });
+  if (res && res.token) {
+    setAuthToken(res.token);
+  }
+  return res;
 }
 
 export async function signupUser(email: string, password: string, fullName: string, role: string = "counselor") {
-  return request<any>("/auth/signup", {
+  const res = await request<any>("/auth/signup", {
     method: "POST",
     body: JSON.stringify({ email, password, full_name: fullName, role }),
   });
+  if (res && res.token) {
+    setAuthToken(res.token);
+  }
+  return res;
 }
 
 export async function demoLogin() {
   return loginUser("demo@kintsu.org", "demo123");
+}
+
+export async function fetchCurrentUser() {
+  return request<any>("/auth/me");
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -72,9 +102,6 @@ export async function fetchPrisonerFiles() {
   return request<any>("/participants/files");
 }
 
-
-
-
 // ═══════════════════════════════════════════════════════════════════════════
 // SESSIONS API
 // ═══════════════════════════════════════════════════════════════════════════
@@ -92,21 +119,10 @@ export async function fetchSessions(params?: { status?: string; block?: string; 
 // SESSION BUILDER API
 // ═══════════════════════════════════════════════════════════════════════════
 
-export async function fetchSessionTemplates() {
-  return request<any[]>("/session-builder/templates");
-}
-
-export async function generateAISession(topic: string, category: string, block?: string) {
+export async function generateAISession(params: { topic: string; targetGroup?: string; durationMinutes?: number }) {
   return request<any>("/session-builder/generate-ai", {
     method: "POST",
-    body: JSON.stringify({ topic, category, block }),
-  });
-}
-
-export async function saveSessionDraft(draftData: any) {
-  return request<any>("/session-builder/draft", {
-    method: "POST",
-    body: JSON.stringify(draftData),
+    body: JSON.stringify(params),
   });
 }
 
@@ -118,7 +134,7 @@ export async function publishSession(sessionData: any) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// PARTICIPANTS & PROGRESS API
+// PARTICIPANTS & REHABILITATION API
 // ═══════════════════════════════════════════════════════════════════════════
 
 export async function fetchParticipants(params?: { block?: string; stage?: string }) {
@@ -126,31 +142,20 @@ export async function fetchParticipants(params?: { block?: string; stage?: strin
   return request<any[]>(`/participants${query ? `?${query}` : ""}`);
 }
 
-export async function fetchParticipantProgress(participantId: string) {
-  return request<any>(`/progress/participants/${participantId}`);
-}
-
-export async function addCaseworkNote(participantId: string, note: string) {
-  return request<any>(`/participants/${participantId}/notes`, {
-    method: "POST",
-    body: JSON.stringify({ note }),
-  });
-}
-
 // ═══════════════════════════════════════════════════════════════════════════
-// LIBRARIES & ANALYTICS API
+// CONTENT & RESOURCES API
 // ═══════════════════════════════════════════════════════════════════════════
 
 export async function fetchStories(category?: string) {
-  return request<any[]>(`/stories${category ? `?category=${encodeURIComponent(category)}` : ""}`);
+  return request<any[]>(`/stories${category ? `?category=${category}` : ""}`);
 }
 
 export async function fetchBooks(category?: string) {
-  return request<any[]>(`/books${category ? `?category=${encodeURIComponent(category)}` : ""}`);
+  return request<any[]>(`/books${category ? `?category=${category}` : ""}`);
 }
 
 export async function fetchAnalytics() {
-  return request<any>("/analytics");
+  return request<any>("/progress/summary");
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -161,17 +166,17 @@ export async function fetchRoleplayScenarios() {
   return request<any[]>("/roleplay/scenarios");
 }
 
-export async function startRoleplay(scenarioId: string, participantName: string) {
+export async function startRoleplay(scenarioId: string, participantId?: string) {
   return request<any>("/roleplay/start", {
     method: "POST",
-    body: JSON.stringify({ scenarioId, participantName }),
+    body: JSON.stringify({ scenarioId, participantId }),
   });
 }
 
-export async function submitRoleplayTurn(logId: string, userInput: string) {
+export async function submitRoleplayTurn(logId: string, userDialogue: string) {
   return request<any>("/roleplay/turn", {
     method: "POST",
-    body: JSON.stringify({ logId, userInput }),
+    body: JSON.stringify({ logId, userDialogue }),
   });
 }
 
