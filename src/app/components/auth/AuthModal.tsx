@@ -21,7 +21,7 @@ interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
   defaultTab?: "login" | "signup";
-  onSuccess: () => void;
+  onSuccess: (user?: any) => void;
 }
 
 export function AuthModal({ isOpen, onClose, defaultTab = "login", onSuccess }: AuthModalProps) {
@@ -40,13 +40,14 @@ export function AuthModal({ isOpen, onClose, defaultTab = "login", onSuccess }: 
     setErrorMessage("");
 
     try {
+      let res: any;
       if (tab === "login") {
-        await loginUser(email, password);
+        res = await loginUser(email, password);
       } else {
-        await signupUser(email, password, name || "Counselor");
+        res = await signupUser(email, password, name || "Counselor");
       }
       setIsSubmitting(false);
-      onSuccess();
+      onSuccess(res?.user);
     } catch (err: any) {
       setIsSubmitting(false);
       setErrorMessage(err.message || "Authentication failed. Please check your details.");
@@ -57,14 +58,15 @@ export function AuthModal({ isOpen, onClose, defaultTab = "login", onSuccess }: 
     setIsSubmitting(true);
     setErrorMessage("");
     try {
-      await demoLogin();
+      const res = await demoLogin();
       setIsSubmitting(false);
-      onSuccess();
+      onSuccess(res?.user);
     } catch (err: any) {
       setIsSubmitting(false);
       setErrorMessage(err.message || "Demo login failed.");
     }
   };
+
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm fade-in">

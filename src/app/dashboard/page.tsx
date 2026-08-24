@@ -4,11 +4,12 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import App from "@/app/App";
 import { AuthModal } from "@/app/components/auth/AuthModal";
-import { fetchCurrentUser, getAuthToken } from "@/lib/api";
+import { fetchCurrentUser } from "@/lib/api";
 
 export default function DashboardPage() {
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const [currentUser, setCurrentUser] = useState<any>(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
 
   useEffect(() => {
@@ -16,6 +17,7 @@ export default function DashboardPage() {
       try {
         const res = await fetchCurrentUser();
         if (res && res.user) {
+          setCurrentUser(res.user);
           setIsAuthenticated(true);
         } else {
           setIsAuthenticated(false);
@@ -58,11 +60,14 @@ export default function DashboardPage() {
           isOpen={showAuthModal}
           onClose={() => router.push("/")}
           defaultTab="login"
-          onSuccess={() => setIsAuthenticated(true)}
+          onSuccess={(userData) => {
+            if (userData) setCurrentUser(userData);
+            setIsAuthenticated(true);
+          }}
         />
       </div>
     );
   }
 
-  return <App />;
+  return <App initialUser={currentUser} />;
 }

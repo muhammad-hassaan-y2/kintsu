@@ -581,7 +581,11 @@ function BottomSection() {
   );
 }
 
-function PageToday() {
+function PageToday({ currentUser }: { currentUser?: any }) {
+  const nameDisplay = currentUser?.fullName ? currentUser.fullName.split(" ")[0] : "Counselor";
+  const fullTitle = currentUser?.fullName || "Counselor";
+  const userRole = currentUser?.role ? (currentUser.role.charAt(0).toUpperCase() + currentUser.role.slice(1)) : "Counselor";
+
   return (
     <>
       <Hero />
@@ -589,13 +593,14 @@ function PageToday() {
         <div className="flex-1 min-w-0 flex flex-col gap-5">
           <div className="fade-up" style={{ animationDelay: "50ms" }}>
             <h1 className="font-bold leading-none" style={{ fontSize: 32, letterSpacing: "-0.025em" }}>
-              <span style={{ color: T.cream }}>Good morning, </span>
-              <span className="gold-shimmer">Priya</span>
+              <span style={{ color: T.cream }}>Welcome back, </span>
+              <span className="gold-shimmer">{nameDisplay}</span>
             </h1>
             <p className="text-sm mt-1.5" style={{ color: T.slate }}>
-              You have <span className="font-semibold" style={{ color: T.gold }}>2 sessions</span> today — your next starts in 47 minutes.
+              Logged in as <span className="font-semibold text-white">{fullTitle}</span> ({userRole}) · Connected to <span className="font-semibold" style={{ color: T.gold }}>Neon PostgreSQL</span>.
             </p>
           </div>
+
           <div className="fade-up rounded-2xl px-5 py-4 flex items-start gap-4"
             style={{ backgroundColor: `${T.burgundy}18`, border: `1px solid ${T.burgundy}44`, animationDelay: "100ms" }}>
             <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 mt-0.5" style={{ backgroundColor: `${T.amber}22` }}>
@@ -2051,10 +2056,10 @@ function PageRoleplay() {
 // ROOT APP
 // ═══════════════════════════════════════════════════════════════════════════
 
-export default function App() {
+export default function App({ initialUser }: { initialUser?: any }) {
   const router = useRouter();
   const [active, setActive] = useState(1);
-  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [currentUser, setCurrentUser] = useState<any>(initialUser || null);
   const [profileModalOpen, setProfileModalOpen] = useState(false);
   const [timeLeft, setTimeLeft] = useState(300); // 5 minutes = 300 seconds
 
@@ -2094,13 +2099,13 @@ export default function App() {
 
   const renderPage = () => {
     switch (active) {
-      case 1: return <PageToday />;
+      case 1: return <PageToday currentUser={currentUser} />;
       case 2: return <PageSessionBuilder />;
       case 3: return <PageMyPrisoners />;
       case 4: return <PageReports />;
       case 5: return <PageStoryLibrary />;
       case 6: return <PageRoleplay />;
-      default: return <PageToday />;
+      default: return <PageToday currentUser={currentUser} />;
     }
   };
 
@@ -2110,9 +2115,10 @@ export default function App() {
       <UserProfileModal
         isOpen={profileModalOpen}
         onClose={() => setProfileModalOpen(false)}
-        user={currentUser || { fullName: "Priya Rajan", email: "demo@kintsu.org", role: "Counselor" }}
+        user={currentUser || { fullName: "Counselor Officer", email: "demo@kintsu.org", role: "Counselor" }}
         onLogout={handleLogout}
       />
+
       <div className="flex min-h-screen" style={{ backgroundColor: T.midnight, fontFamily: "Inter, sans-serif" }}>
         <Sidebar 
           active={active} 
