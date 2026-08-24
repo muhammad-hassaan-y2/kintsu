@@ -313,13 +313,14 @@ function Footer() {
 // PAGE 1: TODAY'S SESSIONS (Dashboard original)
 // ═══════════════════════════════════════════════════════════════════════════
 
-const PILLS = [
-  { text: "New collaboration with Dr. Sharma",    dot: T.gold,     delay: 0    },
-  { text: "Session #7 — Block C has just launched", dot: "#60A5FA", delay: 0.4 },
-  { text: "Welcome our new intern, Ananya!",      dot: "#4ADE80",  delay: 0.8  },
-];
+function Hero({ currentUser }: { currentUser?: any }) {
+  const activeName = currentUser?.fullName || "Counselor";
+  const pills = [
+    { text: `Active Counselor: ${activeName}`, dot: T.gold, delay: 0 },
+    { text: "Session #7 — Block 4B active", dot: "#60A5FA", delay: 0.4 },
+    { text: "Verified Neon PostgreSQL Database", dot: "#4ADE80", delay: 0.8 },
+  ];
 
-function Hero() {
   return (
     <div className="relative overflow-hidden" style={{ height: 420 }}>
       <img
@@ -342,7 +343,7 @@ function Hero() {
           <div className="relative z-10 flex flex-col items-center gap-2 text-center px-8" style={{ width: 248 }}>
             <p className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: T.gold }}>Session Ready</p>
             <p className="font-bold leading-tight" style={{ fontSize: 22, color: T.cream, letterSpacing: "-0.02em" }}>Anger Management</p>
-            <p className="text-xs leading-relaxed" style={{ color: T.creamDim }}>Block C · 12 prisoners</p>
+            <p className="text-xs leading-relaxed" style={{ color: T.creamDim }}>Block 4B · 12 prisoners</p>
             <div className="flex items-center gap-1.5 mt-1">
               <Clock size={12} style={{ color: T.gold }} />
               <span className="text-sm font-semibold" style={{ color: T.cream }}>11:00 AM</span>
@@ -358,7 +359,7 @@ function Hero() {
         </div>
       </div>
       <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3 flex-wrap justify-center px-4">
-        {PILLS.map(({ text, dot, delay }) => (
+        {pills.map(({ text, dot, delay }) => (
           <div key={text} className="float-pill flex items-center gap-2 px-4 py-2 rounded-full text-xs font-medium backdrop-blur-md"
             style={{ backgroundColor: "rgba(10,22,40,0.72)", border: `1px solid ${dot}44`, color: T.cream, animationDelay: `${delay}s`, boxShadow: `0 4px 16px rgba(0,0,0,0.3)` }}>
             <Dot color={dot} />{text}
@@ -372,6 +373,7 @@ function Hero() {
     </div>
   );
 }
+
 
 function Widget({ children, delay = 0, className = "" }: { children: React.ReactNode; delay?: number; className?: string }) {
   return (
@@ -588,7 +590,8 @@ function PageToday({ currentUser }: { currentUser?: any }) {
 
   return (
     <>
-      <Hero />
+      <Hero currentUser={currentUser} />
+
       <div className="flex gap-5 p-6">
         <div className="flex-1 min-w-0 flex flex-col gap-5">
           <div className="fade-up" style={{ animationDelay: "50ms" }}>
