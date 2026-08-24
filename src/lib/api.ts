@@ -61,16 +61,39 @@ export async function loginUser(email: string, password: string) {
   return res;
 }
 
-export async function signupUser(email: string, password: string, fullName: string, role: string = "counselor") {
+export async function signupUser(
+  email: string, 
+  password: string, 
+  fullName: string, 
+  role: string = "counselor",
+  prisonerData?: {
+    prisonerName?: string;
+    inmateId?: string;
+    securityBlock?: string;
+    riskLevel?: string;
+    rehabTrack?: string;
+  }
+) {
   const res = await request<any>("/auth/signup", {
     method: "POST",
-    body: JSON.stringify({ email, password, full_name: fullName, role }),
+    body: JSON.stringify({ 
+      email, 
+      password, 
+      full_name: fullName, 
+      role,
+      prisoner_name: prisonerData?.prisonerName,
+      prisoner_inmate_id: prisonerData?.inmateId,
+      prisoner_block: prisonerData?.securityBlock,
+      prisoner_risk_level: prisonerData?.riskLevel,
+      prisoner_rehab_track: prisonerData?.rehabTrack
+    }),
   });
   if (res && res.token) {
     setAuthToken(res.token);
   }
   return res;
 }
+
 
 export async function demoLogin() {
   return loginUser("demo@kintsu.org", "demo123");

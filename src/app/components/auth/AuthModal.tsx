@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { X, Lock, Mail, User, ArrowRight, ShieldCheck, CheckCircle, AlertCircle, Sparkles } from "lucide-react";
+import { X, Lock, Mail, User, ArrowRight, ShieldCheck, CheckCircle, AlertCircle, Sparkles, FileText, Building2, Layers } from "lucide-react";
 import { loginUser, signupUser, demoLogin } from "@/lib/api";
 
 const T = {
@@ -29,6 +29,14 @@ export function AuthModal({ isOpen, onClose, defaultTab = "login", onSuccess }: 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  
+  // Prisoner Intake Section State (Sign Up)
+  const [prisonerName, setPrisonerName] = useState("");
+  const [inmateId, setInmateId] = useState(`INM-${Math.floor(1000 + Math.random() * 9000)}`);
+  const [securityBlock, setSecurityBlock] = useState("Block 4B");
+  const [riskLevel, setRiskLevel] = useState("Low Risk");
+  const [rehabTrack, setRehabTrack] = useState("Emotional Regulation");
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -44,7 +52,13 @@ export function AuthModal({ isOpen, onClose, defaultTab = "login", onSuccess }: 
       if (tab === "login") {
         res = await loginUser(email, password);
       } else {
-        res = await signupUser(email, password, name || "Counselor");
+        res = await signupUser(email, password, name || "Counselor", "counselor", {
+          prisonerName: prisonerName || "Marcus Vance",
+          inmateId: inmateId,
+          securityBlock: securityBlock,
+          riskLevel: riskLevel,
+          rehabTrack: rehabTrack,
+        });
       }
       setIsSubmitting(false);
       onSuccess(res?.user);
@@ -67,11 +81,10 @@ export function AuthModal({ isOpen, onClose, defaultTab = "login", onSuccess }: 
     }
   };
 
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm fade-in">
       <div 
-        className="relative w-full max-w-md p-8 rounded-2xl border shadow-2xl scale-in"
+        className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto p-8 rounded-2xl border shadow-2xl scale-in"
         style={{
           backgroundColor: T.midnight,
           borderColor: T.goldDim,
@@ -92,10 +105,10 @@ export function AuthModal({ isOpen, onClose, defaultTab = "login", onSuccess }: 
             <ShieldCheck className="w-6 h-6" style={{ color: T.gold }} />
           </div>
           <h2 className="text-2xl font-bold tracking-tight text-white">
-            {tab === "login" ? "Welcome Back to Kintsu" : "Create your Kintsu Account"}
+            {tab === "login" ? "Welcome Back to Kintsu" : "Create Counselor Account"}
           </h2>
           <p className="text-sm mt-1" style={{ color: T.slateL }}>
-            {tab === "login" ? "Access your rehabilitation & counseling workspace" : "Join leading rehabilitation officers & counselors"}
+            {tab === "login" ? "Access your rehabilitation & counseling workspace" : "Register officer credentials & initial prisoner file"}
           </p>
         </div>
 
@@ -152,14 +165,14 @@ export function AuthModal({ isOpen, onClose, defaultTab = "login", onSuccess }: 
           {tab === "signup" && (
             <div>
               <label className="block text-xs font-semibold mb-1 uppercase tracking-wider" style={{ color: T.creamDim }}>
-                Full Name
+                Counselor Full Name
               </label>
               <div className="relative">
                 <User className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
                 <input
                   type="text"
                   required
-                  placeholder="Priya Rajan"
+                  placeholder="Officer Hassaan"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   className="w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm focus:outline-none transition-all"
@@ -182,7 +195,7 @@ export function AuthModal({ isOpen, onClose, defaultTab = "login", onSuccess }: 
               <input
                 type="email"
                 required
-                placeholder="demo@kintsu.org"
+                placeholder="hassaan@kintsu.org"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm focus:outline-none transition-all"
@@ -217,6 +230,121 @@ export function AuthModal({ isOpen, onClose, defaultTab = "login", onSuccess }: 
             </div>
           </div>
 
+          {/* Initial Prisoner Rehabilitation File Section (Sign Up Only) */}
+          {tab === "signup" && (
+            <div className="mt-6 pt-4 border-t" style={{ borderColor: T.border }}>
+              <div className="flex items-center gap-2 mb-3">
+                <FileText className="w-4 h-4" style={{ color: T.gold }} />
+                <span className="text-xs font-bold uppercase tracking-wider text-white">
+                  Initial Assigned Prisoner Rehabilitation File
+                </span>
+              </div>
+
+              <div className="space-y-3 p-4 rounded-xl border" style={{ backgroundColor: T.navy, borderColor: T.border }}>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: T.slateL }}>
+                      Prisoner Full Name
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Marcus Vance"
+                      value={prisonerName}
+                      onChange={(e) => setPrisonerName(e.target.value)}
+                      className="w-full px-3 py-2 rounded-lg border text-xs focus:outline-none"
+                      style={{
+                        backgroundColor: T.midnight,
+                        borderColor: T.border,
+                        color: T.cream,
+                      }}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: T.slateL }}>
+                      Inmate ID Code
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={inmateId}
+                      onChange={(e) => setInmateId(e.target.value)}
+                      className="w-full px-3 py-2 rounded-lg border text-xs font-mono font-bold focus:outline-none"
+                      style={{
+                        backgroundColor: T.midnight,
+                        borderColor: T.border,
+                        color: T.gold,
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2">
+                  <div>
+                    <label className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: T.slateL }}>
+                      Facility Unit
+                    </label>
+                    <select
+                      value={securityBlock}
+                      onChange={(e) => setSecurityBlock(e.target.value)}
+                      className="w-full px-2 py-2 rounded-lg border text-xs focus:outline-none cursor-pointer"
+                      style={{
+                        backgroundColor: T.midnight,
+                        borderColor: T.border,
+                        color: T.cream,
+                      }}
+                    >
+                      <option value="Block 4B">Block 4B</option>
+                      <option value="Block 2A">Block 2A</option>
+                      <option value="Block 1C">Block 1C</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: T.slateL }}>
+                      Risk Level
+                    </label>
+                    <select
+                      value={riskLevel}
+                      onChange={(e) => setRiskLevel(e.target.value)}
+                      className="w-full px-2 py-2 rounded-lg border text-xs focus:outline-none cursor-pointer"
+                      style={{
+                        backgroundColor: T.midnight,
+                        borderColor: T.border,
+                        color: T.cream,
+                      }}
+                    >
+                      <option value="Low Risk">Low Risk</option>
+                      <option value="Medium Risk">Medium Risk</option>
+                      <option value="High Risk">High Risk</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] font-bold uppercase tracking-wider mb-1" style={{ color: T.slateL }}>
+                      Rehab Track
+                    </label>
+                    <select
+                      value={rehabTrack}
+                      onChange={(e) => setRehabTrack(e.target.value)}
+                      className="w-full px-2 py-2 rounded-lg border text-xs focus:outline-none cursor-pointer"
+                      style={{
+                        backgroundColor: T.midnight,
+                        borderColor: T.border,
+                        color: T.cream,
+                      }}
+                    >
+                      <option value="Emotional Regulation">Emotional</option>
+                      <option value="Conflict De-escalation">Conflict</option>
+                      <option value="Re-entry Readiness">Re-entry</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {tab === "login" ? (
             <div className="flex items-center justify-between text-xs">
               <label className="flex items-center gap-2 cursor-pointer" style={{ color: T.slateL }}>
@@ -230,7 +358,7 @@ export function AuthModal({ isOpen, onClose, defaultTab = "login", onSuccess }: 
           ) : (
             <div className="text-xs flex items-center gap-2" style={{ color: T.slateL }}>
               <CheckCircle className="w-4 h-4" style={{ color: T.gold }} />
-              <span>Connects securely to Neon PostgreSQL database</span>
+              <span>Saves counselor credentials & prisoner intake file in Neon DB</span>
             </div>
           )}
 
@@ -245,10 +373,10 @@ export function AuthModal({ isOpen, onClose, defaultTab = "login", onSuccess }: 
             }}
           >
             {isSubmitting ? (
-              <span>Authenticating with Neon DB...</span>
+              <span>Saving Account to Neon DB...</span>
             ) : (
               <>
-                <span>{tab === "login" ? "Enter Dashboard" : "Create Account & Enter"}</span>
+                <span>{tab === "login" ? "Enter Dashboard" : "Register Account & Initial Prisoner File"}</span>
                 <ArrowRight className="w-4 h-4" />
               </>
             )}

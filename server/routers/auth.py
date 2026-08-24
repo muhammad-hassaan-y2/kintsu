@@ -1,10 +1,11 @@
 import datetime
 import bcrypt
 import jwt
+from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Header, status
 from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import Session
-from database import get_db, UserModel
+from database import get_db, UserModel, PrisonerFileModel
 from config import JWT_SECRET
 
 router = APIRouter(prefix="/api/auth", tags=["Auth"])
@@ -15,6 +16,11 @@ class SignupRequest(BaseModel):
     password: str
     full_name: str
     role: str = "counselor"
+    prisoner_name: Optional[str] = None
+    prisoner_inmate_id: Optional[str] = None
+    prisoner_block: Optional[str] = "Block 4B"
+    prisoner_risk_level: Optional[str] = "Low Risk"
+    prisoner_rehab_track: Optional[str] = "Emotional Regulation"
 
 class LoginRequest(BaseModel):
     email: str
@@ -38,11 +44,10 @@ def create_access_token(user_id: int, email: str, role: str) -> str:
         "email": email,
         "role": role,
         "exp": datetime.datetime.utcnow() + datetime.timedelta(minutes=5)
-
     }
     return jwt.encode(payload, JWT_SECRET, algorithm="HS256")
 
-# 1. Sign Up Endpoint (Exclusively Neon PostgreSQL)
+# 1. Sign Up Endpoint (Exclusively Neon PostgreSQL + Prisoner Intake)
 @router.post("/signup")
 def signup(req: SignupRequest, db: Session = Depends(get_db)):
     email_clean = req.email.strip().lower()
@@ -68,12 +73,31 @@ def signup(req: SignupRequest, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_user)
 
+    # Automatically create initial Prisoner File in Neon DB if prisoner_name provided
+    if req.prisoner_name and req.prisoner_name.strip():
+        inmate_id_code = req.prisoner_inmate_id.strip().upper() if req.prisoner_inmate_id else f"INM-{int(datetime.datetime.utcnow().timestamp()) % 9000 + 1000}"
+        
+        # Ensure inmate_id uniqueness
+        existing_file = db.query(PrisonerFileModel).filter(PrisonerFileModel.inmate_id == inmate_id_code).first()
+        if not existing_file:
+            new_prisoner = PrisonerFileModel(
+                inmate_id=inmate_id_code,
+                full_name=req.prisoner_name.strip(),
+                security_block=req.prisoner_block or "Block 4B",
+                risk_level=req.prisoner_risk_level or "Low Risk",
+                rehab_track=req.prisoner_rehab_track or "Emotional Regulation",
+                counselor_notes=f"Initial prisoner file created during counselor signup by {new_user.full_name}."
+            )
+            db.add(new_prisoner)
+            db.commit()
+            print(f"[Database] Automatically created prisoner file during signup: {inmate_id_code} ({new_prisoner.full_name})")
+
     # Generate JWT token
     token = create_access_token(new_user.id, new_user.email, new_user.role)
 
     return {
         "success": True,
-        "message": "Account created successfully in Neon PostgreSQL",
+        "message": "Account & Initial Prisoner File created in Neon PostgreSQL",
         "token": token,
         "user": {
             "id": new_user.id,
