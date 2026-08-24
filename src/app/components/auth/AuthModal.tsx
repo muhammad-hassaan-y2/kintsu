@@ -125,8 +125,9 @@ export function AuthModal({ isOpen, onClose, defaultTab = "login", onSuccess }: 
           }}
         >
           <Sparkles className="w-3.5 h-3.5" />
-          <span>One-Click Demo Account Login (demo@kintsu.org)</span>
+          <span>⚡ One-Click Unique Demo Account (New Separate Session)</span>
         </button>
+
 
         {/* Tab Switcher */}
         <div className="flex p-1 rounded-xl mb-6 border" style={{ backgroundColor: T.navy, borderColor: T.border }}>

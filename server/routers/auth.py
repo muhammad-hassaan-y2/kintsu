@@ -1,6 +1,7 @@
 import datetime
 import bcrypt
 import jwt
+import random
 from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Header, status
 from pydantic import BaseModel, EmailStr
@@ -108,7 +109,57 @@ def signup(req: SignupRequest, db: Session = Depends(get_db)):
         }
     }
 
-# 2. Log In Endpoint (Exclusively Neon PostgreSQL)
+# 2. Dynamic Unique Demo Account Creation Endpoint (Neon PostgreSQL)
+@router.post("/demo-login")
+def create_unique_demo_account(db: Session = Depends(get_db)):
+    random_num = random.randint(1000, 9999)
+    demo_email = f"demo.counselor.{random_num}@kintsu.org"
+    demo_name = f"Demo Counselor #{random_num}"
+    hashed_pwd = hash_password(f"demo{random_num}")
+
+    # Register brand-new, isolated Demo User in Neon DB
+    new_demo = UserModel(
+        email=demo_email,
+        password_hash=hashed_pwd,
+        full_name=demo_name,
+        role="counselor"
+    )
+    db.add(new_demo)
+    db.commit()
+    db.refresh(new_demo)
+
+    # Seed dedicated unique Prisoner File for this demo session
+    inmate_code = f"INM-{random_num}"
+    new_prisoner = PrisonerFileModel(
+        inmate_id=inmate_code,
+        full_name=f"Inmate #{random_num}",
+        security_block="Block 4B",
+        risk_level="Low Risk",
+        rehab_track="Conflict De-escalation",
+        counselor_notes=f"Initial prisoner file automatically assigned to demo session {demo_name}."
+    )
+    db.add(new_prisoner)
+    db.commit()
+
+    print(f"[Database] Generated unique demo account: {demo_email} with inmate file {inmate_code}")
+
+    # Issue 5-min JWT token
+    token = create_access_token(new_demo.id, new_demo.email, new_demo.role)
+
+    return {
+        "success": True,
+        "message": f"Created unique demo account {demo_name} in Neon DB",
+        "token": token,
+        "user": {
+            "id": new_demo.id,
+            "email": new_demo.email,
+            "fullName": new_demo.full_name,
+            "role": new_demo.role,
+            "createdAt": new_demo.created_at.isoformat()
+        }
+    }
+
+# 3. Log In Endpoint (Exclusively Neon PostgreSQL)
 @router.post("/login")
 def login(req: LoginRequest, db: Session = Depends(get_db)):
     email_clean = req.email.strip().lower()
@@ -144,12 +195,12 @@ def login(req: LoginRequest, db: Session = Depends(get_db)):
         }
     }
 
-# 3. Get Authenticated User Profile Endpoint (Neon PostgreSQL)
+# 4. Get Authenticated User Profile Endpoint (Neon PostgreSQL)
 @router.get("/me")
 def get_profile(authorization: str = Header(None), db: Session = Depends(get_db)):
     if not authorization or not authorization.startswith("Bearer "):
         # Query default demo user from Neon DB
-        demo_user = db.query(UserModel).filter(UserModel.email == "demo@kintsu.org").first()
+        demo_user = db.query(UserModel).filter(UserModel.email.like("demo.counselor%")).order_by(UserModel.id.desc()).first()
         if demo_user:
             return {
                 "success": True,

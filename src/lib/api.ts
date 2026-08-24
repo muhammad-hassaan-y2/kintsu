@@ -96,8 +96,13 @@ export async function signupUser(
 
 
 export async function demoLogin() {
-  return loginUser("demo@kintsu.org", "demo123");
+  const res = await request<any>("/auth/demo-login", { method: "POST" });
+  if (res && res.token) {
+    setAuthToken(res.token);
+  }
+  return res;
 }
+
 
 export async function fetchCurrentUser() {
   return request<any>("/auth/me");
