@@ -142,12 +142,17 @@ export async function fetchSessions(params?: { status?: string; block?: string; 
 // SESSION BUILDER API
 // ═══════════════════════════════════════════════════════════════════════════
 
-export async function generateAISession(params: { topic: string; targetGroup?: string; durationMinutes?: number }) {
+export async function generateAISession(params: { topic: string; targetGroup?: string; durationMinutes?: number; inmateId?: string }) {
   return request<any>("/session-builder/generate-ai", {
     method: "POST",
-    body: JSON.stringify(params),
+    body: JSON.stringify({
+      topic: params.topic,
+      block: params.targetGroup,
+      inmate_id: params.inmateId
+    }),
   });
 }
+
 
 export async function publishSession(sessionData: any) {
   return request<any>("/session-builder/publish", {

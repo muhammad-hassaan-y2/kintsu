@@ -642,16 +642,39 @@ function PageSessionBuilder() {
 
   const [aiTopic, setAiTopic] = useState("Handling Rejection & Frustration");
   const [aiCategory, setAiCategory] = useState("Respect & Society");
-  const [targetBlock, setTargetBlock] = useState("Block C");
+  const [targetBlock, setTargetBlock] = useState("Block 4B");
+  const [dbPrisoners, setDbPrisoners] = useState<any[]>([]);
+  const [selectedPrisonerId, setSelectedPrisonerId] = useState<string>("INM-4092");
   const [loadingAi, setLoadingAi] = useState(false);
   const [generatedSession, setGeneratedSession] = useState<any>(null);
   const [publishMessage, setPublishMessage] = useState("");
+
+  useEffect(() => {
+    async function loadPrisoners() {
+      try {
+        const res = await fetchPrisonerFiles();
+        if (res && res.data) {
+          setDbPrisoners(res.data);
+          if (res.data.length > 0) {
+            setSelectedPrisonerId(res.data[0].inmateId);
+          }
+        }
+      } catch (err) {
+        console.warn("Could not load prisoner profiles for context memory:", err);
+      }
+    }
+    loadPrisoners();
+  }, []);
 
   const handleGenerateSession = async () => {
     setLoadingAi(true);
     setPublishMessage("");
     try {
-      const data = await generateAISession({ topic: aiTopic, targetGroup: targetBlock });
+      const data = await generateAISession({ 
+        topic: aiTopic, 
+        targetGroup: targetBlock,
+        inmateId: selectedPrisonerId
+      });
 
       setGeneratedSession(data);
     } catch (err: any) {
@@ -729,16 +752,16 @@ function PageSessionBuilder() {
       <div className="p-6 flex gap-5">
         <div className="flex-1 min-w-0 flex flex-col gap-5">
 
-          {/* ✨ Gemini AI Generator Card */}
+          {/* ✨ LangChain & Google GenAI Agent Generator Card */}
           <div className="fade-up rounded-2xl p-5" style={{ background: `linear-gradient(135deg, ${T.midnight} 0%, rgba(201,162,39,0.1) 100%)`, border: `1px solid ${T.gold}44`, boxShadow: T.cardShadow }}>
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <Sparkles size={18} style={{ color: T.gold }} />
-                <p className="text-sm font-bold" style={{ color: T.cream }}>✨ Gemini AI Curriculum Generator</p>
+                <p className="text-sm font-bold" style={{ color: T.cream }}>✨ LangChain & Google GenAI Agent Orchestrator</p>
               </div>
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded" style={{ backgroundColor: `${T.gold}22`, color: T.gold }}>FastAPI Powered</span>
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded" style={{ backgroundColor: `${T.gold}22`, color: T.gold }}>Neon DB Context Memory</span>
             </div>
-            <div className="grid grid-cols-3 gap-3 mb-3">
+            <div className="grid grid-cols-4 gap-3 mb-3">
               <div>
                 <label className="text-[10px] font-semibold" style={{ color: T.slateL }}>Session Topic</label>
                 <input type="text" value={aiTopic} onChange={e => setAiTopic(e.target.value)}
@@ -754,11 +777,24 @@ function PageSessionBuilder() {
                 </select>
               </div>
               <div>
-                <label className="text-[10px] font-semibold" style={{ color: T.slateL }}>Target Cellblock</label>
+                <label className="text-[10px] font-semibold" style={{ color: T.slateL }}>Target Unit</label>
                 <select value={targetBlock} onChange={e => setTargetBlock(e.target.value)}
                   className="w-full mt-1 px-3 py-1.5 rounded-lg text-xs outline-none cursor-pointer"
                   style={{ backgroundColor: "rgba(255,255,255,0.06)", border: `1px solid ${T.border}`, color: T.cream }}>
-                  <option>Block C</option><option>Block A</option><option>Block B</option><option>Block D</option>
+                  <option>Block 4B</option><option>Block 2A</option><option>Block 1C</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-[10px] font-semibold" style={{ color: T.slateL }}>Prisoner Context Memory (Neon DB)</label>
+                <select value={selectedPrisonerId} onChange={e => setSelectedPrisonerId(e.target.value)}
+                  className="w-full mt-1 px-3 py-1.5 rounded-lg text-xs outline-none cursor-pointer font-semibold"
+                  style={{ backgroundColor: "rgba(255,255,255,0.06)", border: `1px solid ${T.gold}44`, color: T.gold }}>
+                  {dbPrisoners.map((p: any) => (
+                    <option key={p.inmateId} value={p.inmateId}>
+                      {p.fullName} ({p.inmateId})
+                    </option>
+                  ))}
+                  {dbPrisoners.length === 0 && <option value="INM-4092">Marcus Vance (INM-4092)</option>}
                 </select>
               </div>
             </div>
@@ -768,9 +804,9 @@ function PageSessionBuilder() {
                 className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold cursor-pointer transition-all hover:scale-[1.02]"
                 style={{ backgroundColor: T.gold, color: T.navy }}>
                 {loadingAi ? <RefreshCw size={13} className="animate-spin" /> : <Sparkles size={13} />}
-                {loadingAi ? "Generating Curriculum..." : "Generate 6-Step Plan via Gemini"}
+                <span>{loadingAi ? "Orchestrating via LangChain..." : "Generate AI Session with LangChain"}</span>
               </button>
-
+              
               {generatedSession && (
                 <button onClick={handlePublish}
                   className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold cursor-pointer transition-all hover:scale-[1.02]"
@@ -780,10 +816,17 @@ function PageSessionBuilder() {
               )}
             </div>
 
+            {generatedSession?.contextMemory && (
+              <p className="mt-2 text-[11px] font-semibold text-emerald-400">
+                ✓ LangChain & Google GenAI Context Memory Injected: {generatedSession.contextMemory.fullName} ({generatedSession.contextMemory.riskLevel})
+              </p>
+            )}
+
             {publishMessage && (
               <p className="mt-2 text-xs font-semibold" style={{ color: T.gold }}>{publishMessage}</p>
             )}
           </div>
+
           <div className="fade-up rounded-2xl p-5" style={{ backgroundColor: T.midnight, border: `1px solid ${T.border}`, boxShadow: T.cardShadow }}>
             <div className="flex items-center justify-between mb-6">
               <div>

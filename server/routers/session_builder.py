@@ -1,18 +1,26 @@
 import time
 from typing import Optional
-from fastapi import APIRouter, HTTPException
-from database import db
-from schemas.models import SessionDraftSchema, AIGenerateSessionRequest
-from services.ai_service import generate_session_ai
+from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel
+from sqlalchemy.orm import Session
+from database import get_db, PrisonerFileModel, db as legacy_db
+from schemas.models import SessionDraftSchema
+from services.agent_orchestrator import agent_orchestrator
 
 router = APIRouter(prefix="/api/session-builder", tags=["Session Builder"])
+
+class LangChainSessionRequest(BaseModel):
+    topic: str
+    category: Optional[str] = "Emotional Regulation"
+    block: Optional[str] = "Block 4B"
+    inmate_id: Optional[str] = None
 
 templates = [
     {
         "templateId": "tmpl-deescalation",
         "title": "De-escalation & Emotional Control",
         "category": "Anger Management",
-        "recommendedBlock": "Block C",
+        "recommendedBlock": "Block 4B",
         "defaultDurationMinutes": 55,
         "description": "Structured 6-step module teaching impulse control, 5-4-3-2-1 sensory grounding, and non-violent communication.",
         "suggestedStepsCount": 6
@@ -21,7 +29,7 @@ templates = [
         "templateId": "tmpl-reentry",
         "title": "Re-entry & Modern World Readiness",
         "category": "Life After Prison",
-        "recommendedBlock": "Block A & B",
+        "recommendedBlock": "Block 1C",
         "defaultDurationMinutes": 60,
         "description": "Preparing participants for release: digital payments, modern workplaces, online services, and social integration.",
         "suggestedStepsCount": 5
@@ -30,7 +38,7 @@ templates = [
         "templateId": "tmpl-family",
         "title": "Restoring Family Trust & Communication",
         "category": "Family & Relationships",
-        "recommendedBlock": "All Blocks",
+        "recommendedBlock": "Block 2A",
         "defaultDurationMinutes": 50,
         "description": "Navigating post-release family dynamics, rebuild trust through action, and effective parenting.",
         "suggestedStepsCount": 5
@@ -43,7 +51,7 @@ def get_templates():
 
 @router.get("/drafts")
 def get_drafts():
-    drafts = db.get_collection("sessionDrafts")
+    drafts = legacy_db.get_collection("sessionDrafts")
     return {"success": True, "data": drafts}
 
 @router.post("/draft")
@@ -53,18 +61,40 @@ def save_draft(req: SessionDraftSchema):
     draft_dict["draftId"] = draft_id
     draft_dict["updatedAt"] = time.strftime("%Y-%m-%dT%H:%M:%SZ")
 
-    existing = db.find_by_id("sessionDrafts", draft_id)
+    existing = legacy_db.find_by_id("sessionDrafts", draft_id)
     if existing:
-        db.update("sessionDrafts", draft_id, draft_dict)
+        legacy_db.update("sessionDrafts", draft_id, draft_dict)
     else:
-        db.insert("sessionDrafts", draft_dict)
+        legacy_db.insert("sessionDrafts", draft_dict)
 
     return {"success": True, "message": "Draft saved successfully", "data": draft_dict}
 
+# LangChain + Google GenAI SDK Agent Orchestration with Neon DB Prisoner Context Memory
 @router.post("/generate-ai")
-def generate_ai(req: AIGenerateSessionRequest):
-    ai_session = generate_session_ai(req.topic, req.category, req.block or "Block C")
-    return {"success": True, "message": "Session generated via Gemini AI", "data": ai_session}
+def generate_ai(req: LangChainSessionRequest, db: Session = Depends(get_db)):
+    prisoner_profile = None
+
+    # Query Prisoner Profile Context Memory from Neon DB
+    if req.inmate_id:
+        p_record = db.query(PrisonerFileModel).filter(PrisonerFileModel.inmate_id == req.inmate_id.strip().upper()).first()
+        if p_record:
+            prisoner_profile = {
+                "inmate_id": p_record.inmate_id,
+                "full_name": p_record.full_name,
+                "security_block": p_record.security_block,
+                "risk_level": p_record.risk_level,
+                "rehab_track": p_record.rehab_track,
+                "counselor_notes": p_record.counselor_notes
+            }
+
+    # Execute LangChain Agent Orchestration
+    ai_session = agent_orchestrator.orchestrate_session(req.topic, prisoner_profile)
+    
+    return {
+        "success": True, 
+        "message": "Session generated via LangChain & Google GenAI Agent Orchestration using Neon DB Context Memory", 
+        "data": ai_session
+    }
 
 @router.post("/validate")
 def validate_session(req: SessionDraftSchema):
@@ -91,11 +121,11 @@ def publish_session(req: SessionDraftSchema):
         "category": session_dict.get("category", "Anger Management"),
         "scheduledDate": session_dict.get("scheduledDate") or time.strftime("%Y-%m-%d"),
         "scheduledTime": session_dict.get("scheduledTime") or "10:00 AM",
-        "block": session_dict.get("block") or "Block C",
+        "block": session_dict.get("block") or "Block 4B",
         "targetCount": session_dict.get("targetCount", 15),
         "completedCount": 0,
         "instructorId": "usr-1",
-        "instructorName": "Priya Rajan",
+        "instructorName": "Counselor Officer",
         "status": "upcoming",
         "description": session_dict.get("description", ""),
         "steps": session_dict.get("steps", []),
@@ -103,8 +133,5 @@ def publish_session(req: SessionDraftSchema):
         "updatedAt": time.strftime("%Y-%m-%dT%H:%M:%SZ")
     }
 
-    db.insert("sessions", published)
-    if session_dict.get("draftId"):
-        db.delete("sessionDrafts", session_dict["draftId"])
-
+    legacy_db.insert("sessions", published)
     return {"success": True, "message": "Session published to Today's schedule successfully", "data": published}
