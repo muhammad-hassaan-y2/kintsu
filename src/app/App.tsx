@@ -1084,8 +1084,10 @@ function Lightbulb(props: any) {
 function PageMyPrisoners() {
   const [intakeWizardOpen, setIntakeWizardOpen] = useState(false);
   const [dbPrisoners, setDbPrisoners] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const loadPrisonerFiles = async () => {
+    setLoading(true);
     try {
       const res = await fetchPrisonerFiles();
       if (res && res.data) {
@@ -1093,12 +1095,15 @@ function PageMyPrisoners() {
       }
     } catch (err) {
       console.warn("Could not load Neon DB prisoner files:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
     loadPrisonerFiles();
   }, []);
+
 
   const combinedPrisoners = dbPrisoners.map((p: any) => ({
     initials: p.fullName ? p.fullName.split(" ").map((n: string) => n[0]).join("").toUpperCase() : "PF",
@@ -1144,7 +1149,15 @@ function PageMyPrisoners() {
 
       <div className="p-6 flex gap-5">
         <div className="flex-1 min-w-0 flex flex-col gap-5">
+          {loading && (
+            <div className="flex items-center gap-2.5 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs fade-in">
+              <div className="w-4 h-4 border-2 border-amber-400 border-t-transparent rounded-full animate-spin shrink-0" />
+              <span className="font-semibold">Retrieving prisoner intake files asynchronously from Neon PostgreSQL...</span>
+            </div>
+          )}
+
           <div className="fade-up rounded-2xl p-5" style={{ backgroundColor: T.midnight, border: `1px solid ${T.border}`, boxShadow: T.cardShadow }}>
+
             <div className="flex items-center justify-between mb-5 flex-wrap gap-3">
               <div className="flex items-center gap-3 flex-wrap">
                 <div className="relative">
