@@ -125,8 +125,9 @@ export function AuthModal({ isOpen, onClose, defaultTab = "login", onSuccess }: 
           }}
         >
           <Sparkles className="w-3.5 h-3.5" />
-          <span>⚡ One-Click Unique Demo Account (New Separate Session)</span>
+          <span>Sign Up as Demo User</span>
         </button>
+
 
 
         {/* Tab Switcher */}
@@ -376,9 +377,10 @@ export function AuthModal({ isOpen, onClose, defaultTab = "login", onSuccess }: 
             {isSubmitting ? (
               <div className="flex items-center gap-2">
                 <div className="w-4 h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin shrink-0" />
-                <span>Connecting to Neon DB & Redirecting...</span>
+                <span>Loading...</span>
               </div>
             ) : (
+
 
               <>
                 <span>{tab === "login" ? "Enter Dashboard" : "Register Account & Initial Prisoner File"}</span>
