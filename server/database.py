@@ -43,6 +43,17 @@ class PrisonerFileModel(Base):
     counselor_notes = Column(String(1000), nullable=True)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
 
+# SQLAlchemy Case Note Timeline Model for Neon DB
+class CaseNoteModel(Base):
+    __tablename__ = "case_notes"
+
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    inmate_id = Column(String(100), index=True, nullable=False)
+    counselor_name = Column(String(255), nullable=False)
+    note_text = Column(String(1000), nullable=False)
+    category = Column(String(100), default="Counseling Session")
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+
 # Helper function to hash passwords
 def _hash_pwd(password: str) -> str:
     salt = bcrypt.gensalt()
@@ -136,6 +147,19 @@ try:
             seed_db.add(new_prisoner)
             seed_db.commit()
             print(f"[Database] Seeded prisoner file in Neon DB: {prisoner_data['inmate_id']} ({prisoner_data['full_name']})")
+
+    # Seed Initial Case Note for INM-4092
+    existing_note = seed_db.query(CaseNoteModel).filter(CaseNoteModel.inmate_id == "INM-4092").first()
+    if not existing_note:
+        initial_note = CaseNoteModel(
+            inmate_id="INM-4092",
+            counselor_name="Demo Counselor",
+            note_text="Completed initial intake assessment. Participant demonstrated constructive active listening during de-escalation roleplay.",
+            category="Counseling Session"
+        )
+        seed_db.add(initial_note)
+        seed_db.commit()
+        print("[Database] Seeded initial case note for INM-4092 in Neon DB.")
 
     seed_db.close()
 except Exception as e:

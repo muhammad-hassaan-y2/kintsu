@@ -130,6 +130,18 @@ export async function fetchPrisonerFiles() {
   return request<any>("/participants/files");
 }
 
+export async function fetchCaseNotes(inmateId: string) {
+  return request<any>(`/participants/${inmateId}/case-notes`);
+}
+
+export async function createCaseNote(inmateId: string, noteData: { note_text: string; category?: string; counselor_name?: string }) {
+  return request<any>(`/participants/${inmateId}/case-notes`, {
+    method: "POST",
+    body: JSON.stringify(noteData),
+  });
+}
+
+
 // ═══════════════════════════════════════════════════════════════════════════
 // SESSIONS API
 // ═══════════════════════════════════════════════════════════════════════════

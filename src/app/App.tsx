@@ -13,6 +13,8 @@ import {
   GripVertical, Video, Mic, Smile, ThumbsUp, LogOut
 } from "lucide-react";
 import { ImageWithFallback } from "@/app/components/figma/ImageWithFallback";
+import { CaseNotesTimelineModal } from "@/app/components/participants/CaseNotesTimelineModal";
+
 import {
   fetchTodaySessions,
   fetchSessions,
@@ -1085,6 +1087,7 @@ function PageMyPrisoners() {
   const [intakeWizardOpen, setIntakeWizardOpen] = useState(false);
   const [dbPrisoners, setDbPrisoners] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedInmateForNotes, setSelectedInmateForNotes] = useState<{ id: string; name: string } | null>(null);
 
   const loadPrisonerFiles = async () => {
     setLoading(true);
@@ -1103,6 +1106,7 @@ function PageMyPrisoners() {
   useEffect(() => {
     loadPrisonerFiles();
   }, []);
+
 
 
   const combinedPrisoners = dbPrisoners.map((p: any) => ({
@@ -1130,6 +1134,13 @@ function PageMyPrisoners() {
         onClose={() => setIntakeWizardOpen(false)} 
         onSuccess={loadPrisonerFiles}
       />
+      <CaseNotesTimelineModal
+        isOpen={!!selectedInmateForNotes}
+        onClose={() => setSelectedInmateForNotes(null)}
+        inmateId={selectedInmateForNotes?.id || ""}
+        inmateName={selectedInmateForNotes?.name || ""}
+      />
+
       <div className="page-hero">
         <div className="relative z-10">
           <div className="flex items-center gap-2 mb-3 fade-in">
@@ -1246,13 +1257,24 @@ function PageMyPrisoners() {
                       style={{ backgroundColor: `${statusColor[p.status]}22`, color: statusColor[p.status] }}>{p.status}</span>
                   </div>
                   <div className="col-span-2 flex items-center justify-end gap-1">
-                    <button className="p-2 rounded-lg hover:bg-white/5 transition-colors" title="View Profile"
-                      style={{ color: T.slate }}><Eye size={14} /></button>
-                    <button className="p-2 rounded-lg hover:bg-white/5 transition-colors" title="Edit Plan"
-                      style={{ color: T.slate }}><Edit size={14} /></button>
-                    <button className="p-2 rounded-lg hover:bg-white/5 transition-colors" title="Session Notes"
-                      style={{ color: T.slate }}><FileText size={14} /></button>
+                    <button 
+                      onClick={() => setSelectedInmateForNotes({ id: p.id, name: p.name })} 
+                      className="p-2 rounded-lg hover:bg-amber-500/20 transition-colors" 
+                      title="View Timeline & Case Notes"
+                      style={{ color: T.gold }}
+                    >
+                      <Eye size={14} />
+                    </button>
+                    <button 
+                      onClick={() => setSelectedInmateForNotes({ id: p.id, name: p.name })} 
+                      className="p-2 rounded-lg hover:bg-amber-500/20 transition-colors" 
+                      title="Add Case Notes (Neon DB)"
+                      style={{ color: T.gold }}
+                    >
+                      <FileText size={14} />
+                    </button>
                   </div>
+
                 </div>
               ))}
             </div>
@@ -1389,9 +1411,35 @@ function PageReports() {
   const lineData = [45, 52, 48, 61, 58, 67, 72, 70, 78, 82, 79, 88];
 
 
+  const handleExportCSV = () => {
+    if (!dbPrisoners || dbPrisoners.length === 0) return;
+    const headers = ["Inmate ID", "Full Name", "Security Unit", "Risk Level", "Rehabilitation Track", "Counselor Notes", "Created Date"];
+    const rows = dbPrisoners.map(p => [
+      `"${p.inmateId}"`,
+      `"${p.fullName}"`,
+      `"${p.securityBlock}"`,
+      `"${p.riskLevel}"`,
+      `"${p.rehabTrack}"`,
+      `"${(p.counselorNotes || '').replace(/"/g, '""')}"`,
+      `"${p.createdAt}"`
+    ]);
+    const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `Kintsu_Rehabilitation_Report_${new Date().toISOString().slice(0,10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleExportPDF = () => {
+    window.print();
+  };
+
   return (
     <>
-      <div className="page-hero">
+      <div className="page-hero flex items-center justify-between flex-wrap gap-4">
         <div className="relative z-10">
           <div className="flex items-center gap-2 mb-3 fade-in">
             <span className="text-[11px] font-bold uppercase tracking-widest px-3 py-1 rounded-full"
@@ -1405,7 +1453,28 @@ function PageReports() {
             Data-driven insights into rehabilitation outcomes, engagement trends, and program effectiveness backed by Neon PostgreSQL.
           </p>
         </div>
+
+        <div className="relative z-10 flex items-center gap-3">
+          <button
+            onClick={handleExportCSV}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all hover:scale-105 cursor-pointer border shadow-lg"
+            style={{ backgroundColor: "rgba(255,255,255,0.05)", borderColor: T.border, color: T.cream }}
+          >
+            <Download size={14} style={{ color: T.gold }} />
+            <span>Export CSV</span>
+          </button>
+
+          <button
+            onClick={handleExportPDF}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all hover:scale-105 cursor-pointer shadow-lg"
+            style={{ backgroundColor: T.gold, color: T.navy }}
+          >
+            <FileText size={14} />
+            <span>Print / Download PDF Report</span>
+          </button>
+        </div>
       </div>
+
 
       <div className="p-6 flex gap-5 flex-wrap">
         <div className="grid grid-cols-4 gap-4 w-full fade-up">
