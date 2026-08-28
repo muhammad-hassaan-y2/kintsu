@@ -3,7 +3,7 @@ import json
 import datetime
 import bcrypt
 from typing import Dict, Any, List, Optional
-from sqlalchemy import create_engine, Column, Integer, String, DateTime, Boolean
+from sqlalchemy import create_engine, Column, Integer, String, DateTime, Boolean, Text
 from sqlalchemy.orm import sessionmaker, declarative_base
 from config import DATABASE_URL
 
@@ -18,7 +18,7 @@ engine = create_engine(
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
-# SQLAlchemy User Model for Neon DB
+# 1. User Model for Neon DB
 class UserModel(Base):
     __tablename__ = "users"
 
@@ -30,7 +30,7 @@ class UserModel(Base):
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     is_active = Column(Boolean, default=True)
 
-# SQLAlchemy Prisoner File Model for Neon DB
+# 2. Prisoner File Model for Neon DB
 class PrisonerFileModel(Base):
     __tablename__ = "prisoner_files"
 
@@ -43,7 +43,7 @@ class PrisonerFileModel(Base):
     counselor_notes = Column(String(1000), nullable=True)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
 
-# SQLAlchemy Case Note Timeline Model for Neon DB
+# 3. Case Note Timeline Model for Neon DB
 class CaseNoteModel(Base):
     __tablename__ = "case_notes"
 
@@ -52,6 +52,58 @@ class CaseNoteModel(Base):
     counselor_name = Column(String(255), nullable=False)
     note_text = Column(String(1000), nullable=False)
     category = Column(String(100), default="Counseling Session")
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+
+# 4. Session Model for Neon DB
+class SessionModel(Base):
+    __tablename__ = "sessions"
+
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    title = Column(String(255), nullable=False)
+    inmate_id = Column(String(100), nullable=True)
+    counselor_name = Column(String(255), default="Counselor Officer")
+    date = Column(String(100), nullable=False)
+    time = Column(String(100), nullable=False)
+    location = Column(String(255), default="Block 4B Counseling Unit")
+    status = Column(String(50), default="Scheduled")
+    rehab_track = Column(String(100), default="Conflict De-escalation")
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+
+# 5. Roleplay Scenario Model for Neon DB
+class RoleplayScenarioModel(Base):
+    __tablename__ = "roleplay_scenarios"
+
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    scenario_id = Column(String(100), unique=True, index=True, nullable=False)
+    title = Column(String(255), nullable=False)
+    description = Column(Text, nullable=False)
+    difficulty = Column(String(50), default="Intermediate")
+    category = Column(String(100), default="Conflict Resolution")
+    initial_prompt = Column(Text, nullable=False)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+
+# 6. Educational Story Model for Neon DB
+class EducationalStoryModel(Base):
+    __tablename__ = "educational_stories"
+
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    title = Column(String(255), nullable=False)
+    author = Column(String(255), default="Kintsu Curriculum")
+    category = Column(String(100), default="Rehabilitation Case Study")
+    summary = Column(Text, nullable=False)
+    content = Column(Text, nullable=False)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+
+# 7. Educational Book Model for Neon DB
+class EducationalBookModel(Base):
+    __tablename__ = "educational_books"
+
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    title = Column(String(255), nullable=False)
+    author = Column(String(255), nullable=False)
+    category = Column(String(100), default="Cognitive Behavioral Growth")
+    summary = Column(Text, nullable=False)
+    cover_color = Column(String(50), default="#C9A227")
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
 
 # Helper function to hash passwords
@@ -119,14 +171,60 @@ INITIAL_PRISONER_FILES = [
     }
 ]
 
-# Create tables and seed demo user & prisoner files automatically in Neon PostgreSQL
+INITIAL_ROLEPLAY_SCENARIOS = [
+    {
+        "scenario_id": "RP-101",
+        "title": "Housing Block Verbal Dispute De-escalation",
+        "description": "Practice non-violent communication during a tense dispute over personal belongings in Housing Block B.",
+        "difficulty": "Intermediate",
+        "category": "Conflict Resolution",
+        "initial_prompt": "An inmate accuses you of taking his assigned radio in the common area. How do you respond to de-escalate?"
+    },
+    {
+        "scenario_id": "RP-102",
+        "title": "Peer Pressure & Refusal Training",
+        "description": "Learn assertive refusal strategies when confronted with contraband requests in the workshop.",
+        "difficulty": "Advanced",
+        "category": "Impulse & Refusal Control",
+        "initial_prompt": "A long-time acquaintance asks you to carry a hidden package across the facility corridor."
+    }
+]
+
+INITIAL_STORIES = [
+    {
+        "title": "Pathways to Re-entry: Marcus's Transformation",
+        "author": "Dr. Sarah Jenkins, Rehabilitation Specialist",
+        "category": "Cognitive Restructuring",
+        "summary": "A case study examining emotional regulation milestones and conflict de-escalation techniques in high-security environments.",
+        "content": "Marcus Vance successfully completed 24 weeks of cognitive behavioral therapy, demonstrating how active listening reduces recidivism."
+    }
+]
+
+INITIAL_BOOKS = [
+    {
+        "title": "Principles of Restorative Justice & Emotional Literacy",
+        "author": "Kintsu Rehabilitation Press",
+        "category": "Restorative Justice",
+        "summary": "Comprehensive guide to accountability, empathy development, and community reintegration.",
+        "cover_color": "#C9A227"
+    },
+    {
+        "title": "De-escalation Strategies in Correctional Counseling",
+        "author": "Prof. David Miller",
+        "category": "Counseling Practice",
+        "summary": "Practical frameworks for conflict mediation, active listening, and stress management.",
+        "cover_color": "#1E3A5F"
+    }
+]
+
+# Create tables and seed default models automatically in Neon PostgreSQL
 try:
     Base.metadata.create_all(bind=engine)
-    print("[Database] Connected to Neon PostgreSQL & initialized tables.")
+    print("[Database] Connected to Neon PostgreSQL & initialized all tables.")
 
     seed_db = SessionLocal()
 
-    # Seed Demo User automatically if not present
+    # 1. Seed Demo User
     demo_user = seed_db.query(UserModel).filter(UserModel.email == "demo@kintsu.org").first()
     if not demo_user:
         new_demo = UserModel(
@@ -137,29 +235,56 @@ try:
         )
         seed_db.add(new_demo)
         seed_db.commit()
-        print("[Database] Seeded demo user: demo@kintsu.org (Password: demo123)")
 
-    # Seed All Prisoner Profiles automatically into Neon DB
-    for prisoner_data in INITIAL_PRISONER_FILES:
-        existing = seed_db.query(PrisonerFileModel).filter(PrisonerFileModel.inmate_id == prisoner_data["inmate_id"]).first()
+    # 2. Seed Prisoner Profiles
+    for p_data in INITIAL_PRISONER_FILES:
+        existing = seed_db.query(PrisonerFileModel).filter(PrisonerFileModel.inmate_id == p_data["inmate_id"]).first()
         if not existing:
-            new_prisoner = PrisonerFileModel(**prisoner_data)
-            seed_db.add(new_prisoner)
+            seed_db.add(PrisonerFileModel(**p_data))
             seed_db.commit()
-            print(f"[Database] Seeded prisoner file in Neon DB: {prisoner_data['inmate_id']} ({prisoner_data['full_name']})")
 
-    # Seed Initial Case Note for INM-4092
-    existing_note = seed_db.query(CaseNoteModel).filter(CaseNoteModel.inmate_id == "INM-4092").first()
-    if not existing_note:
-        initial_note = CaseNoteModel(
+    # 3. Seed Roleplay Scenarios
+    for rp in INITIAL_ROLEPLAY_SCENARIOS:
+        existing_rp = seed_db.query(RoleplayScenarioModel).filter(RoleplayScenarioModel.scenario_id == rp["scenario_id"]).first()
+        if not existing_rp:
+            seed_db.add(RoleplayScenarioModel(**rp))
+            seed_db.commit()
+
+    # 4. Seed Educational Stories
+    if seed_db.query(EducationalStoryModel).count() == 0:
+        for st in INITIAL_STORIES:
+            seed_db.add(EducationalStoryModel(**st))
+        seed_db.commit()
+
+    # 5. Seed Educational Books
+    if seed_db.query(EducationalBookModel).count() == 0:
+        for bk in INITIAL_BOOKS:
+            seed_db.add(EducationalBookModel(**bk))
+        seed_db.commit()
+
+    # 6. Seed Sample Sessions
+    if seed_db.query(SessionModel).count() == 0:
+        seed_db.add(SessionModel(
+            title="Emotional Regulation Workshop",
             inmate_id="INM-4092",
             counselor_name="Demo Counselor",
-            note_text="Completed initial intake assessment. Participant demonstrated constructive active listening during de-escalation roleplay.",
-            category="Counseling Session"
-        )
-        seed_db.add(initial_note)
+            date="Today",
+            time="10:00 AM",
+            location="Block 4B Counseling Unit",
+            status="Scheduled",
+            rehab_track="Conflict De-escalation"
+        ))
+        seed_db.add(SessionModel(
+            title="De-escalation & Refusal Tactics",
+            inmate_id="K-2847",
+            counselor_name="Demo Counselor",
+            date="Today",
+            time="02:00 PM",
+            location="Block 2A Counseling Unit",
+            status="Scheduled",
+            rehab_track="Emotional Regulation"
+        ))
         seed_db.commit()
-        print("[Database] Seeded initial case note for INM-4092 in Neon DB.")
 
     seed_db.close()
 except Exception as e:
@@ -173,7 +298,7 @@ def get_db():
     finally:
         db.close()
 
-# Legacy JsonDatabase for local fallback & mock collections
+# Legacy JsonDatabase for local fallback
 DB_FILE_PATH = os.path.join(os.path.dirname(__file__), "data", "db.json")
 
 class JsonDatabase:
