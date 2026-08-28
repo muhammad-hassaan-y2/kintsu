@@ -1,10 +1,12 @@
 import os
 import json
+import re
 from typing import Dict, Any, Optional
 from google import genai
 from google.genai import types
 from langchain_core.prompts import PromptTemplate
 from config import GEMINI_API_KEY
+from services.ai_service import clean_json_string
 
 class LangChainAgentOrchestrator:
     """
@@ -121,8 +123,9 @@ class LangChainAgentOrchestrator:
                     )
                 )
                 if response.text:
-                    parsed = json.loads(response.text)
-                    return parsed
+                    cleaned = clean_json_string(response.text)
+                    if cleaned:
+                        return json.loads(cleaned)
             except Exception as e:
                 print(f"[AI Agent Error] Gemini generation failed, using structured agent fallback: {e}")
 

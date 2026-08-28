@@ -8,6 +8,16 @@ print(f"[Kintsu FastAPI AI Integration] Provider Mode: [{ai_provider.upper()}]")
 
 client = genai.Client(api_key=GEMINI_API_KEY) if GEMINI_API_KEY else None
 
+def clean_json_string(text: str) -> str:
+    """Helper function to strip markdown code blocks and extract raw JSON."""
+    if not text:
+        return ""
+    # Remove markdown code fence ```json ... ```
+    cleaned = re.sub(r'^```(?:json)?\s*', '', text.strip(), flags=re.IGNORECASE)
+    cleaned = re.sub(r'\s*```$', '', cleaned)
+    match = re.search(r'\{[\s\S]*\}', cleaned)
+    return match.group(0) if match else cleaned
+
 def get_ai_status():
     return {
         "provider": "gemini",
@@ -59,9 +69,9 @@ Return a valid JSON object with the following structure:
     raw_text = generate_text(prompt, system_instruction)
     if raw_text:
         try:
-            match = re.search(r'\{[\s\S]*\}', raw_text)
-            if match:
-                return json.loads(match.group(0))
+            cleaned = clean_json_string(raw_text)
+            if cleaned:
+                return json.loads(cleaned)
         except Exception as e:
             print(f"Error parsing JSON from Gemini: {e}")
 
@@ -97,9 +107,9 @@ Return JSON:
     raw_text = generate_text(prompt, system_instruction)
     if raw_text:
         try:
-            match = re.search(r'\{[\s\S]*\}', raw_text)
-            if match:
-                return json.loads(match.group(0))
+            cleaned = clean_json_string(raw_text)
+            if cleaned:
+                return json.loads(cleaned)
         except Exception:
             pass
 
