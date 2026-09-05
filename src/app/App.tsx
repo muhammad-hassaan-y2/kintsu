@@ -775,10 +775,10 @@ function PageSessionBuilder() {
   };
 
   const programs = [
-    { icon: <Heart size={22} />, title: "Anger Management", desc: "12 sessions · Beginner", color: T.burgundy, selected: true },
-    { icon: <Brain size={22} />, title: "Cognitive Skills", desc: "8 sessions · Intermediate", color: "#60A5FA", selected: false },
-    { icon: <Handshake size={22} />, title: "Family Relations", desc: "6 sessions · Advanced", color: T.green, selected: false },
-    { icon: <Target size={22} />, title: "Goal Setting", desc: "10 sessions · Beginner", color: T.gold, selected: false },
+    { icon: <Heart size={22} />, title: "Emotional Regulation & De-escalation", desc: "12 structured modules · Clinical CBT", color: T.burgundy, selected: true },
+    { icon: <Brain size={22} />, title: "Cognitive Restructuring & Impulse Control", desc: "8 evidence-based sessions · Behavioral Growth", color: "#60A5FA", selected: false },
+    { icon: <Handshake size={22} />, title: "Restorative Justice & Victim Empathy", desc: "6 intensive workshops · Accountability Track", color: T.green, selected: false },
+    { icon: <Target size={22} />, title: "Re-Entry Planning & Community Readiness", desc: "10 practical guides · Transition Track", color: T.gold, selected: false },
   ];
 
   const modules = generatedSession?.steps
@@ -788,12 +788,12 @@ function PageSessionBuilder() {
         status: s.stepNumber === 1 ? "done" : s.stepNumber === 2 ? "current" : "pending"
       }))
     : [
-        { title: "Introduction to Emotions", duration: "45 min", status: "done" },
-        { title: "Identifying Triggers", duration: "60 min", status: "done" },
-        { title: "Coping Techniques — Breathing", duration: "50 min", status: "current" },
-        { title: "Thought Stopping Practice", duration: "55 min", status: "pending" },
-        { title: "Role Play: High Stress Scenarios", duration: "75 min", status: "pending" },
+        { title: "Module 1: Emotional Grounding & De-escalation Check-in", duration: "15 min", status: "done" },
+        { title: "Module 2: Cognitive Distortion & Trigger Audit", duration: "25 min", status: "done" },
+        { title: "Module 3: Stop-Think-Act Roleplay Simulation", duration: "30 min", status: "current" },
+        { title: "Module 4: Personal Accountability & Counselor Action Plan", duration: "20 min", status: "pending" },
       ];
+
 
   return (
     <>
