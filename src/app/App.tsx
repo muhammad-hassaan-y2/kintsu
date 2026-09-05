@@ -251,7 +251,8 @@ function Sidebar({ active, setActive, currentUser, onOpenProfile, onLogout, time
       <div className="mx-3 mb-2 px-3 py-2 rounded-xl flex items-center justify-between" style={{ backgroundColor: "rgba(255,255,255,0.03)", border: `1px solid ${T.border}` }}>
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: "#22C55E" }} />
-          <span className="text-[11px] font-semibold" style={{ color: T.cream }}>Neon DB & FastAPI</span>
+          <span className="text-[11px] font-semibold" style={{ color: T.cream }}>Correctional Counseling Portal</span>
+
         </div>
         <span className="text-[9px] px-1.5 py-0.5 rounded font-mono" style={{ backgroundColor: `${T.gold}22`, color: T.gold }}>:8000</span>
       </div>
@@ -409,13 +410,13 @@ function StatsWidget() {
   }, []);
 
   const stats = [
-    { icon: <BarChart2 size={16} />, label: "Active Prisoners", value: String(prisonerCount), unit: "Neon DB", color: T.gold },
+    { icon: <BarChart2 size={16} />, label: "Active Prisoners", value: String(prisonerCount), unit: "Active", color: T.gold },
     { icon: <Clock     size={16} />, label: "Session Hours",    value: "14.5",  unit: "hours",   color: "#60A5FA" },
     { icon: <Star      size={16} />, label: "Rehab Tracks",    value: "6",     unit: "active",  color: T.burgundy },
   ];
   return (
     <Widget delay={100}>
-      <WidgetHeader title="Live Neon DB Stats" icon={<TrendingUp size={16} />} />
+      <WidgetHeader title="Facility Overview" icon={<TrendingUp size={16} />} />
       <div className="flex flex-col gap-3">
         {stats.map(({ icon, label, value, unit, color }, i) => (
           <div key={label} className="flex items-center gap-3 px-4 py-3 rounded-xl count-up"
@@ -488,7 +489,7 @@ function ScheduleWidget() {
 
   return (
     <Widget delay={300}>
-      <WidgetHeader title="Live Schedule (Neon DB)" icon={<CalendarDays size={16} />} />
+      <WidgetHeader title="Classroom Schedule" icon={<CalendarDays size={16} />} />
       <div className="flex flex-col gap-1">
         {displayMeetings.map(({ dot, date, time, title, via }, i) => (
           <div key={i} className="flex items-start gap-3 px-3 py-3 rounded-xl hover:bg-white/5 transition-colors cursor-pointer fade-up"
@@ -527,18 +528,19 @@ function FilesWidget() {
     ? prisonerFiles.map((p: any, idx: number) => ({
         icon: idx === 0 ? <File size={14} /> : idx === 1 ? <FileText size={14} /> : <Presentation size={14} />,
         name: `${p.inmateId}_${p.fullName.replace(" ", "_")}_File.pdf`,
-        size: "Neon DB Record",
+        size: "Confidential Record",
         color: idx === 0 ? T.burgundy : idx === 1 ? "#60A5FA" : T.amber
       }))
     : [
-        { icon: <File size={14} />, name: "INM-4092_Marcus_Vance_Intake.pdf", size: "Neon DB", color: T.burgundy },
-        { icon: <FileText size={14} />, name: "K-2847_Vikram_Sharma_Notes.docx", size: "Neon DB", color: "#60A5FA" },
-        { icon: <Presentation size={14} />, name: "K-3102_Arjun_Patel_Evaluation.pdf", size: "Neon DB", color: T.amber },
+        { icon: <File size={14} />, name: "INM-4092_Marcus_Vance_Intake.pdf", size: "Confidential Record", color: T.burgundy },
+        { icon: <FileText size={14} />, name: "K-2847_Vikram_Sharma_Notes.docx", size: "Confidential Record", color: "#60A5FA" },
+        { icon: <Presentation size={14} />, name: "K-3102_Arjun_Patel_Evaluation.pdf", size: "Confidential Record", color: T.amber },
       ];
 
   return (
     <Widget delay={400}>
-      <WidgetHeader title="Intake Records (Neon DB)" icon={<FileText size={16} />} />
+      <WidgetHeader title="Recent Rehabilitation Files" icon={<FileText size={16} />} />
+
       <div className="flex flex-col gap-1.5">
         {displayFiles.map(({ icon, name, size, color }, i) => (
           <div key={i} className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/5 transition-colors cursor-pointer fade-up"
@@ -584,11 +586,12 @@ function PrisonerSnapshot() {
     <div className="fade-up rounded-2xl p-5 flex flex-col gap-3"
       style={{ backgroundColor: T.midnight, boxShadow: T.cardShadow, border: `1px solid ${T.border}`, animationDelay: "450ms" }}>
       <div className="flex items-center justify-between">
-        <p className="text-sm font-semibold" style={{ color: T.cream }}>My Prisoners (Neon DB)</p>
+        <p className="text-sm font-semibold" style={{ color: T.cream }}>My Assigned Prisoners</p>
         <span className="text-[10px] font-bold px-2 py-0.5 rounded" style={{ backgroundColor: `${T.gold}22`, color: T.gold }}>
-          Live Neon DB
+          Active Case Load
         </span>
       </div>
+
       {displayList.map(({ initials, name, prog, color, status }, i) => (
         <div key={name} className="flex items-center gap-3 fade-up" style={{ animationDelay: `${550 + i * 60}ms` }}>
           <Avatar initials={initials} size={34} bg={color} />
@@ -829,14 +832,14 @@ function PageSessionBuilder() {
       <div className="p-6 flex gap-5">
         <div className="flex-1 min-w-0 flex flex-col gap-5">
 
-          {/* ✨ LangChain & Google GenAI Agent Generator Card */}
+          {/* AI Rehabilitation Curriculum Generator Card */}
           <div className="fade-up rounded-2xl p-5" style={{ background: `linear-gradient(135deg, ${T.midnight} 0%, rgba(201,162,39,0.1) 100%)`, border: `1px solid ${T.gold}44`, boxShadow: T.cardShadow }}>
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <Sparkles size={18} style={{ color: T.gold }} />
-                <p className="text-sm font-bold" style={{ color: T.cream }}>✨ LangChain & Google GenAI Agent Orchestrator</p>
+                <p className="text-sm font-bold" style={{ color: T.cream }}>AI Rehabilitation Curriculum Generator</p>
               </div>
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded" style={{ backgroundColor: `${T.gold}22`, color: T.gold }}>Neon DB Context Memory</span>
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded" style={{ backgroundColor: `${T.gold}22`, color: T.gold }}>Inmate Context Memory</span>
             </div>
             <div className="grid grid-cols-4 gap-3 mb-3">
               <div>
@@ -862,7 +865,7 @@ function PageSessionBuilder() {
                 </select>
               </div>
               <div>
-                <label className="text-[10px] font-semibold" style={{ color: T.slateL }}>Prisoner Context Memory (Neon DB)</label>
+                <label className="text-[10px] font-semibold" style={{ color: T.slateL }}>Select Inmate Profile</label>
                 <select value={selectedPrisonerId} onChange={e => setSelectedPrisonerId(e.target.value)}
                   className="w-full mt-1 px-3 py-1.5 rounded-lg text-xs outline-none cursor-pointer font-semibold"
                   style={{ backgroundColor: "rgba(255,255,255,0.06)", border: `1px solid ${T.gold}44`, color: T.gold }}>
@@ -881,7 +884,7 @@ function PageSessionBuilder() {
                 className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold cursor-pointer transition-all hover:scale-[1.02]"
                 style={{ backgroundColor: T.gold, color: T.navy }}>
                 {loadingAi ? <RefreshCw size={13} className="animate-spin" /> : <Sparkles size={13} />}
-                <span>{loadingAi ? "Orchestrating via LangChain..." : "Generate AI Session with LangChain"}</span>
+                <span>{loadingAi ? "Generating Curriculum..." : "Generate AI Rehabilitation Session"}</span>
               </button>
               
               {generatedSession && (
@@ -895,7 +898,7 @@ function PageSessionBuilder() {
 
             {generatedSession?.contextMemory && (
               <p className="mt-2 text-[11px] font-semibold text-emerald-400">
-                ✓ LangChain & Google GenAI Context Memory Injected: {generatedSession.contextMemory.fullName} ({generatedSession.contextMemory.riskLevel})
+                ✓ Context Memory Injected: {generatedSession.contextMemory.fullName} ({generatedSession.contextMemory.riskLevel})
               </p>
             )}
 
@@ -903,6 +906,7 @@ function PageSessionBuilder() {
               <p className="mt-2 text-xs font-semibold" style={{ color: T.gold }}>{publishMessage}</p>
             )}
           </div>
+
 
           <div className="fade-up rounded-2xl p-5" style={{ backgroundColor: T.midnight, border: `1px solid ${T.border}`, boxShadow: T.cardShadow }}>
             <div className="flex items-center justify-between mb-6">
@@ -1020,27 +1024,28 @@ function PageSessionBuilder() {
             <p className="text-sm font-semibold mb-4" style={{ color: T.cream }}>Session Summary</p>
             <div className="space-y-3">
               {[
-                { label: "Program", value: "Anger Management", color: T.gold },
-                { label: "Modules", value: "5 of 12", color: "#60A5FA" },
-                { label: "Duration", value: "4h 45m", color: T.green },
-                { label: "Participants", value: "0 selected", color: T.burgundy },
+                { label: "Program Track", value: generatedSession?.category || "Emotional Regulation & De-escalation", color: T.gold },
+                { label: "Session Modules", value: `${generatedSession?.steps?.length || 4} Active Modules`, color: "#60A5FA" },
+                { label: "Est. Duration", value: `${generatedSession?.steps ? generatedSession.steps.reduce((acc: number, s: any) => acc + (s.durationMinutes || 15), 0) : 90} mins`, color: T.green },
+                { label: "Assigned Inmate", value: generatedSession?.contextMemory?.fullName ? `${generatedSession.contextMemory.fullName} (${generatedSession.contextMemory.inmateId})` : "Marcus Vance (INM-4092)", color: T.burgundy },
               ].map((s, i) => (
                 <div key={s.label} className="flex items-center justify-between fade-up" style={{ animationDelay: `${100 + i * 60}ms` }}>
                   <span className="text-xs" style={{ color: T.slateL }}>{s.label}</span>
-                  <span className="text-xs font-semibold" style={{ color: s.color }}>{s.value}</span>
+                  <span className="text-xs font-semibold truncate max-w-[160px] text-right" style={{ color: s.color }}>{s.value}</span>
                 </div>
               ))}
             </div>
             <div className="mt-5 pt-4" style={{ borderTop: `1px solid ${T.border}` }}>
               <div className="flex justify-between mb-2">
-                <span className="text-xs" style={{ color: T.slateL }}>Completion</span>
-                <span className="text-xs font-bold" style={{ color: T.gold }}>40%</span>
+                <span className="text-xs" style={{ color: T.slateL }}>Curriculum Status</span>
+                <span className="text-xs font-bold" style={{ color: T.gold }}>Ready for Classroom</span>
               </div>
               <div className="w-full h-2 rounded-full" style={{ backgroundColor: "rgba(255,255,255,0.06)" }}>
-                <div className="bar-grow h-full rounded-full" style={{ width: "40%", backgroundColor: T.gold }} />
+                <div className="bar-grow h-full rounded-full" style={{ width: "100%", backgroundColor: T.gold }} />
               </div>
             </div>
           </div>
+
 
           <div className="fade-up rounded-2xl p-5" style={{ backgroundColor: T.midnight, border: `1px solid ${T.border}`, boxShadow: T.cardShadow, animationDelay: "100ms" }}>
             <div className="flex items-center gap-3 mb-4">
@@ -1353,7 +1358,7 @@ function PageMyPrisoners() {
           <div className="fade-up rounded-2xl p-5" style={{ backgroundColor: T.midnight, border: `1px solid ${T.border}`, boxShadow: T.cardShadow, animationDelay: "150ms" }}>
             <div className="flex items-center gap-2 mb-4">
               <AlertTriangle size={16} style={{ color: T.amber }} />
-              <p className="text-sm font-semibold" style={{ color: T.cream }}>Attention Required (Neon DB)</p>
+              <p className="text-sm font-semibold" style={{ color: T.cream }}>Attention Required</p>
             </div>
             <div className="space-y-3">
               {combinedPrisoners.filter(p => p.risk === "High" || p.risk === "Medium").slice(0, 2).map((a, i) => (
@@ -1457,7 +1462,7 @@ function PageReports() {
         <div className="relative z-10">
           <div className="flex items-center gap-2 mb-3 fade-in">
             <span className="text-[11px] font-bold uppercase tracking-widest px-3 py-1 rounded-full"
-              style={{ backgroundColor: `${T.green}22`, color: T.green }}>Live Neon DB Insights</span>
+              style={{ backgroundColor: `${T.green}22`, color: T.green }}>Rehabilitation Insights</span>
             <span className="text-xs" style={{ color: T.slateL }}>Q3 · 2026</span>
           </div>
           <h1 className="font-bold leading-tight fade-up" style={{ fontSize: 40, color: T.cream, letterSpacing: "-0.03em" }}>
@@ -1493,7 +1498,8 @@ function PageReports() {
       <div className="p-6 flex gap-5 flex-wrap">
         <div className="grid grid-cols-4 gap-4 w-full fade-up">
           {[
-            { label: "Total Neon DB Inmates", value: String(totalInmates || 7), delta: "+100%", icon: <TrendingUp size={20} />, color: T.green, positive: true },
+            { label: "Total Active Inmates", value: String(totalInmates || 7), delta: "+100%", icon: <TrendingUp size={20} />, color: T.green, positive: true },
+
             { label: "Low Risk Ratio", value: `${Math.round(((lowRiskCount || 4) / (totalInmates || 7)) * 100)}%`, delta: "+5.2%", icon: <Shield size={20} />, color: T.gold, positive: true },
             { label: "High Risk Monitor", value: String(highRiskCount || 2), delta: "-12.5%", icon: <Heart size={20} />, color: T.burgundy, positive: true },
             { label: "Active Facility Blocks", value: "3 Units", delta: "100%", icon: <CalendarDays size={20} />, color: "#60A5FA", positive: true },
